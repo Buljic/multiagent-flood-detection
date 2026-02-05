@@ -1,0 +1,84 @@
+seed: 42
+
+simulation:
+  grid_size: 20
+  num_zones: 4
+  steps_per_episode: 400
+  
+river:
+  path_width: 3
+  base_flow: 0.3
+  
+elevation:
+  min: 0.0
+  max: 10.0
+  river_depression: 2.0
+
+rainfall:
+  scenarios:
+    normal:
+      intensity_mean: 0.1
+      intensity_std: 0.05
+      duration_mean: 20
+      duration_std: 10
+      start_range: [50, 200]
+    extreme:
+      intensity_mean: 0.5
+      intensity_std: 0.15
+      duration_mean: 40
+      duration_std: 15
+      start_range: [30, 100]
+  
+soil:
+  saturation_init_mean: 0.3
+  saturation_init_std: 0.15
+  infiltration_rate: 0.02
+  max_saturation: 1.0
+
+water:
+  flood_threshold: 0.7
+  evaporation_rate: 0.005
+  spread_factor: 0.1
+  upstream_inflow: 0.05
+
+sensors:
+  per_zone: 5
+  noise_std: 0.05
+  dropout_rate: 0.1
+  outlier_clip: 0.3
+
+ml:
+  horizon_T: 10
+  features:
+    - water_mean_5
+    - water_slope_5
+    - water_max_10
+    - rain_sum_20
+    - rain_mean_10
+    - soil_mean_10
+    - consensus
+    - health
+
+guardrails:
+  TH_UP: 0.6
+  TH_DOWN: 0.4
+  K_UP: 3
+  K_DOWN: 5
+  CONS_MIN: 0.5
+  HEALTH_MIN: 0.6
+  degraded_TH_UP: 0.7
+  degraded_K_UP: 5
+
+baseline:
+  water_threshold: 0.5
+  rain_threshold: 2.0
+
+countermeasures:
+  enabled: false
+  pump_capacity: 0.05
+  gate_reduction: 0.3
+  cooldown_steps: 10
+
+logging:
+  level: INFO
+  output_dir: outputs/logs

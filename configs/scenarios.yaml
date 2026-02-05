@@ -1,0 +1,54 @@
+scenarios:
+  - name: normal_dry
+    rainfall_type: normal
+    soil_saturation_init: 0.2
+    dropout_rate: 0.0
+    noise_level: low
+    
+  - name: normal_wet
+    rainfall_type: normal
+    soil_saturation_init: 0.6
+    dropout_rate: 0.0
+    noise_level: low
+    
+  - name: extreme_dry
+    rainfall_type: extreme
+    soil_saturation_init: 0.2
+    dropout_rate: 0.0
+    noise_level: low
+    
+  - name: extreme_wet
+    rainfall_type: extreme
+    soil_saturation_init: 0.7
+    dropout_rate: 0.0
+    noise_level: low
+    
+  - name: extreme_dropout_10
+    rainfall_type: extreme
+    soil_saturation_init: 0.5
+    dropout_rate: 0.1
+    noise_level: low
+    
+  - name: extreme_dropout_30
+    rainfall_type: extreme
+    soil_saturation_init: 0.5
+    dropout_rate: 0.3
+    noise_level: low
+    
+  - name: extreme_dropout_50
+    rainfall_type: extreme
+    soil_saturation_init: 0.5
+    dropout_rate: 0.5
+    noise_level: low
+    
+  - name: extreme_noisy
+    rainfall_type: extreme
+    soil_saturation_init: 0.5
+    dropout_rate: 0.1
+    noise_level: high
+
+noise_levels:
+  low:
+    sensor_noise_std: 0.03
+  high:
+    sensor_noise_std: 0.15

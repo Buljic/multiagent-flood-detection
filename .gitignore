@@ -1,0 +1,63 @@
+# Internal documentation (not for public repo)
+projectDescription.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Output files (can be regenerated)
+outputs/datasets/*.parquet
+outputs/models/*.pkl
+outputs/models/*.json
+outputs/logs/*.csv
+outputs/logs/*.parquet
+outputs/experiments/*.json
+
+# Keep directory structure
+!outputs/datasets/.gitkeep
+!outputs/models/.gitkeep
+!outputs/logs/.gitkeep
+!outputs/experiments/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
