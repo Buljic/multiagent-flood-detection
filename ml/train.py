@@ -19,7 +19,6 @@ from sklearn.metrics import (
     roc_auc_score, f1_score, precision_score, recall_score,
     classification_report, confusion_matrix, brier_score_loss
 )
-from sklearn.preprocessing import StandardScaler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,11 +44,10 @@ class ModelTrainer:
         self.calibrate = calibrate
         self.random_state = random_state
         self.model = None
-        self.scaler = None
         self.feature_importance = {}
     
     def load_data(self, data_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """Load and split data into train/test sets."""
+        """Load and split data into train/test sets (episode-based to prevent leakage)."""
         df = pd.read_parquet(data_path)
         logger.info(f"Loaded {len(df)} samples from {data_path}")
         
@@ -60,12 +58,31 @@ class ModelTrainer:
         if TARGET_COLUMN not in df.columns:
             raise ValueError(f"Missing target column: {TARGET_COLUMN}")
         
-        X = df[FEATURE_COLUMNS]
-        y = df[TARGET_COLUMN]
+        # Episode-based split: same episode must stay in same set (no leakage)
+        if 'episode_id' in df.columns:
+            episodes = df['episode_id'].unique()
+            np.random.seed(self.random_state)
+            np.random.shuffle(episodes)
+            
+            n_test = int(len(episodes) * 0.2)
+            test_episodes = episodes[:n_test]
+            train_episodes = episodes[n_test:]
+            
+            train_df = df[df['episode_id'].isin(train_episodes)]
+            test_df = df[df['episode_id'].isin(test_episodes)]
+            
+            logger.info(f"Split by episodes: {len(train_episodes)} train episodes, {len(test_episodes)} test episodes")
+        else:
+            # Fallback: stratified split (no episode info)
+            logger.warning("No episode_id column found, using standard stratified split")
+            train_df, test_df = train_test_split(
+                df, test_size=0.2, random_state=self.random_state, stratify=df[TARGET_COLUMN]
+            )
         
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=self.random_state, stratify=y
-        )
+        X_train = train_df[FEATURE_COLUMNS]
+        y_train = train_df[TARGET_COLUMN]
+        X_test = test_df[FEATURE_COLUMNS]
+        y_test = test_df[TARGET_COLUMN]
         
         logger.info(f"Train: {len(X_train)}, Test: {len(X_test)}")
         logger.info(f"Positive rate - Train: {y_train.mean():.3f}, Test: {y_test.mean():.3f}")
@@ -129,10 +146,18 @@ class ModelTrainer:
     def evaluate(self, X_test: pd.DataFrame, y_test: pd.Series) -> Dict:
         """Evaluate model on test set."""
         y_pred = self.model.predict(X_test)
-        y_prob = self.model.predict_proba(X_test)[:, 1]
         
-        # Brier score measures calibration quality (lower is better)
-        brier = brier_score_loss(y_test, y_prob)
+        # Handle edge case: only one class in training data
+        y_prob_all = self.model.predict_proba(X_test)
+        if y_prob_all.shape[1] == 1:
+            # Only one class - all predictions are same class
+            logger.warning("Model only learned one class (insufficient data variation)")
+            y_prob = np.zeros(len(y_pred)) if y_test.sum() == 0 else np.ones(len(y_pred))
+            brier = 1.0  # Worst possible score
+        else:
+            y_prob = y_prob_all[:, 1]
+            # Brier score measures calibration quality (lower is better)
+            brier = brier_score_loss(y_test, y_prob)
         
         metrics = {
             'auc_roc': float(roc_auc_score(y_test, y_prob)),

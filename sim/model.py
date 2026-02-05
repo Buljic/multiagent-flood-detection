@@ -165,27 +165,78 @@ def main():
     parser = argparse.ArgumentParser(description='Run FloodMAS simulation')
     parser.add_argument('--config', type=str, default='configs/default.yaml',
                         help='Path to configuration file')
+    parser.add_argument('--scenarios-file', type=str, default='configs/scenarios.yaml',
+                        help='Path to scenarios configuration file')
     parser.add_argument('--model', type=str, default=None,
                         help='Path to trained ML model (pkl)')
     parser.add_argument('--log', type=str, default='outputs/logs/run.parquet',
                         help='Path to output log file')
     parser.add_argument('--steps', type=int, default=None,
                         help='Number of simulation steps')
-    parser.add_argument('--scenario', type=str, default='normal',
-                        choices=['normal', 'extreme'],
-                        help='Rainfall scenario')
+    parser.add_argument('--scenario', type=str, default='normal_wet',
+                        help='Scenario name (from scenarios.yaml) or rainfall type (normal/extreme)')
     
     args = parser.parse_args()
     
     config = load_config(args.config)
+    
+    # Load and validate scenario
+    scenarios_config = {}
+    if Path(args.scenarios_file).exists():
+        scenarios_config = load_config(args.scenarios_file)
+    
+    scenario_name = args.scenario
+    rainfall_type = None
+    soil_init = None
+    
+    # Check if scenario is a named scenario from scenarios.yaml
+    if 'scenarios' in scenarios_config:
+        scenario_list = scenarios_config['scenarios']
+        scenario_names = [s['name'] for s in scenario_list]
+        
+        if scenario_name in scenario_names:
+            # Use named scenario
+            scenario_data = next(s for s in scenario_list if s['name'] == scenario_name)
+            rainfall_type = scenario_data.get('rainfall_type', 'normal')
+            soil_init = scenario_data.get('soil_saturation_init', 0.3)
+            
+            # Apply scenario-specific sensor config
+            if 'dropout_rate' in scenario_data:
+                config['sensors']['dropout_rate'] = scenario_data['dropout_rate']
+            if 'noise_level' in scenario_data:
+                noise_levels = scenarios_config.get('noise_levels', {})
+                if scenario_data['noise_level'] in noise_levels:
+                    config['sensors']['noise_std'] = noise_levels[scenario_data['noise_level']]['sensor_noise_std']
+            
+            logger.info(f"Using named scenario '{scenario_name}': rainfall={rainfall_type}, soil_init={soil_init}, dropout={config['sensors']['dropout_rate']}, noise={config['sensors']['noise_std']}")
+        elif scenario_name in ['normal', 'extreme']:
+            # Backward compatibility: use as rainfall type
+            rainfall_type = scenario_name
+            soil_init = 0.3
+            logger.info(f"Using rainfall type '{rainfall_type}' (backward compatibility mode)")
+        else:
+            # Invalid scenario
+            logger.error(f"Invalid scenario '{scenario_name}'")
+            logger.error(f"Valid scenarios: {', '.join(scenario_names + ['normal', 'extreme'])}")
+            return
+    else:
+        # No scenarios.yaml, use scenario as rainfall type
+        if scenario_name in ['normal', 'extreme']:
+            rainfall_type = scenario_name
+            soil_init = 0.3
+        else:
+            logger.error(f"Scenario file not found and '{scenario_name}' is not a valid rainfall type (normal/extreme)")
+            return
     
     ml_model = None
     if args.model and Path(args.model).exists():
         ml_model = joblib.load(args.model)
         logger.info(f"Loaded ML model from {args.model}")
     
-    model = FloodModel(config, ml_model=ml_model)
-    model.generate_random_rainfall(args.scenario)
+    model = FloodModel(config, ml_model=ml_model, seed=config.get('seed', 42))
+    if soil_init is not None:
+        model.reset(soil_init)
+    model.generate_random_rainfall(rainfall_type)
     
     steps = args.steps or config['simulation']['steps_per_episode']
     logger.info(f"Running simulation for {steps} steps with scenario '{args.scenario}'")

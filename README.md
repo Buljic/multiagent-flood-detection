@@ -86,18 +86,28 @@ python -m ml.train --data outputs/datasets/sim.parquet \
 python -m sim.model --config configs/default.yaml \
     --model outputs/models/risk_model.pkl \
     --log outputs/logs/run_001.parquet \
-    --scenario extreme
+    --scenario extreme_wet
 ```
+
+Valid scenarios: `normal_wet`, `normal_dry`, `extreme_wet`, `extreme_dry`, `extreme_dropout_10`, `extreme_dropout_30`, `extreme_dropout_50`, `extreme_noisy`
 
 ### 4. Run Experiments
 
 ```bash
-python -m eval.run_experiments --config configs/scenarios.yaml \
+python -m eval.run_experiments --config configs/default.yaml \
+    --scenarios-config configs/scenarios.yaml \
     --model outputs/models/risk_model.pkl \
     --out outputs/experiments/results.json
 ```
 
-### 5. Launch Dashboard
+### 5. Generate Figures
+
+```bash
+python -m eval.make_figures --results outputs/experiments/results.json \
+    --output outputs/figures
+```
+
+### 6. Launch Dashboard
 
 ```bash
 streamlit run dashboard/app.py

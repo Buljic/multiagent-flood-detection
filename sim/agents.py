@@ -25,8 +25,7 @@ class SensorAgent(Agent):
     """
     
     def __init__(self, unique_id: int, model, zone_id: int, cell: tuple, config: dict):
-        super().__init__(model)
-        self.unique_id = unique_id
+        super().__init__(unique_id, model)
         self.zone_id = zone_id
         self.cell = cell
         self.config = config
@@ -84,8 +83,7 @@ class EdgeAggregatorAgent(Agent):
     """
     
     def __init__(self, unique_id: int, model, zone_id: int, config: dict):
-        super().__init__(model)
-        self.unique_id = unique_id
+        super().__init__(unique_id, model)
         self.zone_id = zone_id
         self.config = config
         
@@ -218,8 +216,7 @@ class CoordinatorAgent(Agent):
     """
     
     def __init__(self, unique_id: int, model, config: dict):
-        super().__init__(model)
-        self.unique_id = unique_id
+        super().__init__(unique_id, model)
         self.config = config
         self.edges: List[EdgeAggregatorAgent] = []
         
@@ -251,9 +248,9 @@ class CoordinatorAgent(Agent):
             'step': self.model.environment.current_step,
             'global_risk': self.global_risk,
             'global_alarm': self.global_alarm,
-            'zones_in_alert': self.zones_in_alert.copy(),
-            'zone_risks': {s['zone_id']: s['risk'] for s in statuses},
-            'zone_states': {s['zone_id']: s['state'].value for s in statuses}
+            'zones_in_alert': str(self.zones_in_alert),
+            'zone_risks': str({s['zone_id']: s['risk'] for s in statuses}),
+            'zone_states': str({s['zone_id']: s['state'].value for s in statuses})
         })
     
     def get_global_status(self) -> Dict[str, Any]:
@@ -280,8 +277,7 @@ class MitigationAgent(Agent):
     """
     
     def __init__(self, unique_id: int, model, zone_id: int, config: dict):
-        super().__init__(model)
-        self.unique_id = unique_id
+        super().__init__(unique_id, model)
         self.zone_id = zone_id
         self.config = config
         self.enabled = config.get('countermeasures', {}).get('enabled', False)

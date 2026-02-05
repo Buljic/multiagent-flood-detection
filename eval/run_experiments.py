@@ -240,7 +240,9 @@ class ExperimentRunner:
 
 def main():
     parser = argparse.ArgumentParser(description='Run flood detection experiments')
-    parser.add_argument('--config', type=str, default='configs/scenarios.yaml',
+    parser.add_argument('--config', type=str, default='configs/default.yaml',
+                        help='Path to base configuration')
+    parser.add_argument('--scenarios-config', type=str, default='configs/scenarios.yaml',
                         help='Path to scenarios configuration')
     parser.add_argument('--model', type=str, default=None,
                         help='Path to trained ML model')
@@ -255,10 +257,10 @@ def main():
     
     args = parser.parse_args()
     
-    with open(args.config, 'r') as f:
+    with open(args.scenarios_config, 'r') as f:
         scenarios_config = yaml.safe_load(f)
     
-    with open('configs/default.yaml', 'r') as f:
+    with open(args.config, 'r') as f:
         base_config = yaml.safe_load(f)
     
     base_config.update({k: v for k, v in scenarios_config.items() if k != 'scenarios'})
