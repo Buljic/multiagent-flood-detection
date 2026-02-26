@@ -24,6 +24,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# Default feature columns — overridden at runtime from config['ml']['features']
 FEATURE_COLUMNS = [
     'water_mean_5', 'water_slope_5', 'water_max_10',
     'rain_sum_20', 'rain_mean_10', 'soil_mean_10',
@@ -31,6 +32,13 @@ FEATURE_COLUMNS = [
 ]
 
 TARGET_COLUMN = 'flood_in_next_T'
+
+
+def get_feature_columns(config: dict = None) -> list:
+    """Get feature columns from config or use defaults."""
+    if config and 'ml' in config and 'features' in config['ml']:
+        return config['ml']['features']
+    return FEATURE_COLUMNS
 
 
 class ModelTrainer:
@@ -61,8 +69,8 @@ class ModelTrainer:
         # Episode-based split: same episode must stay in same set (no leakage)
         if 'episode_id' in df.columns:
             episodes = df['episode_id'].unique()
-            np.random.seed(self.random_state)
-            np.random.shuffle(episodes)
+            rng = np.random.default_rng(self.random_state)
+            rng.shuffle(episodes)
             
             n_test = int(len(episodes) * 0.2)
             test_episodes = episodes[:n_test]

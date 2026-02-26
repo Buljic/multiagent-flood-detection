@@ -1,5 +1,27 @@
 seed: 42
 
+# ---------------------------------------------------------------------------
+# Temporal mapping: each simulation step ≈ 15 minutes of real-world time.
+#
+# This maps the discrete simulation steps to a realistic flood monitoring
+# timeline. With steps_per_episode=400 and step_duration_minutes=15:
+#
+#   Total episode duration: 400 x 15 min = 6000 min = 100 hours ~ 4.2 days
+#   Rainfall duration (normal):  20 steps = 5 hours
+#   Rainfall duration (extreme): 40 steps = 10 hours
+#   Prediction horizon (T=10):  10 steps = 2.5 hours advance warning
+#   Debounce K_UP=3:             3 steps = 45 min confirmation delay
+#   Debounce K_DOWN=5:           5 steps = 1.25 hours cool-down delay
+#   Cooldown period (10 steps): 10 steps = 2.5 hours post-alert cooldown
+#   Sensor sampling interval:    1 step  = 15 min (typical for river gauges)
+#
+# These values align with real-world flood monitoring practices where:
+#   - River gauge stations typically report every 5-15 minutes
+#   - Flash flood warnings need 1-3 hours of lead time
+#   - Sustained rainfall events last 4-24 hours
+# ---------------------------------------------------------------------------
+step_duration_minutes: 15
+
 simulation:
   grid_size: 20
   num_zones: 4

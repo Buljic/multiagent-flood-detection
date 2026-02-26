@@ -4,6 +4,7 @@ Runs multiple episodes of simulation and extracts labeled feature vectors.
 """
 
 import argparse
+import copy
 import yaml
 import numpy as np
 import pandas as pd
@@ -12,8 +13,10 @@ from typing import Dict, List, Optional
 from tqdm import tqdm
 import logging
 
+_project_root = str(Path(__file__).parent.parent)
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 from sim.environment import FloodEnvironment
 from sim.guardrails import RingBuffer
@@ -87,32 +90,37 @@ class DataGenerator:
     def _run_episode(self, episode_id: int, seed: int, scenario: str,
                      soil_init: float, dropout_rate: float, noise_std: float,
                      steps: int) -> List[Dict]:
-        """Run single episode and collect labeled data."""
+        """Run single episode and collect labeled data.
+
+        Simulates actual sensor noise/dropout per step to produce realistic
+        consensus and health values matching runtime behaviour.
+        """
         rng = np.random.default_rng(seed)
-        
-        config = self.config.copy()
+
+        config = copy.deepcopy(self.config)
         config['sensors']['dropout_rate'] = dropout_rate
         config['sensors']['noise_std'] = noise_std
-        
+
         env = FloodEnvironment(config, seed)
         env.reset(soil_init)
         env.generate_random_rainfall(scenario)
-        
-        zone_buffers = {
-            z.zone_id: {
-                'water': RingBuffer(50),
-                'rain': RingBuffer(50),
-                'soil': RingBuffer(50)
-            }
-            for z in env.zones
-        }
-        
+
+        sensors_per_zone = config['sensors']['per_zone']
+
         future_flood = {z.zone_id: [] for z in env.zones}
         all_states = []
-        
+
+        # Per-zone sensor state: last water reading per sensor for trend detection
+        zone_sensor_prev = {
+            z.zone_id: [None] * sensors_per_zone for z in env.zones
+        }
+
+        # Per-zone tracking of consensus/health per step
+        zone_step_meta = {z.zone_id: [] for z in env.zones}
+
         for step in range(steps):
             state = env.step()
-            
+
             zone_states = {}
             for zone in env.zones:
                 zs = env.get_zone_state(zone.zone_id)
@@ -122,44 +130,61 @@ class DataGenerator:
                     'soil': zs['soil_mean'],
                     'flooded': env.is_flooded(zone.zone_id)
                 }
-                
-                zone_buffers[zone.zone_id]['water'].append(zs['water_mean'])
-                zone_buffers[zone.zone_id]['rain'].append(state['rainfall'])
-                zone_buffers[zone.zone_id]['soil'].append(zs['soil_mean'])
-            
+
+                # Simulate actual sensors to compute consensus & health
+                active_count = 0
+                rising_count = 0
+                for s_idx in range(sensors_per_zone):
+                    # Simulate dropout
+                    if rng.random() < dropout_rate:
+                        continue
+                    active_count += 1
+                    # Simulate noisy reading
+                    noisy_water = zs['water_mean'] + rng.normal(0, noise_std)
+                    noisy_water = np.clip(noisy_water, 0, 2.0)
+                    # Check trend
+                    prev = zone_sensor_prev[zone.zone_id][s_idx]
+                    if prev is not None and noisy_water > prev:
+                        rising_count += 1
+                    zone_sensor_prev[zone.zone_id][s_idx] = noisy_water
+
+                health = active_count / sensors_per_zone if sensors_per_zone > 0 else 1.0
+                consensus = rising_count / active_count if active_count > 0 else 0.0
+
+                zone_step_meta[zone.zone_id].append({
+                    'consensus': consensus,
+                    'health': health
+                })
+
             all_states.append(zone_states)
-        
+
+        # Compute future flood labels
         for zone in env.zones:
             for step in range(steps):
                 future_steps = all_states[step + 1: step + 1 + self.horizon_T]
                 will_flood = any(s[zone.zone_id]['flooded'] for s in future_steps)
                 future_flood[zone.zone_id].append(will_flood)
-        
+
+        # Build feature records
         records = []
         min_warmup = 20
-        
+
         for zone in env.zones:
             water_buf = RingBuffer(50)
             rain_buf = RingBuffer(50)
             soil_buf = RingBuffer(50)
-            
+
             for step in range(steps - self.horizon_T):
                 zs = all_states[step][zone.zone_id]
                 water_buf.append(zs['water'])
                 rain_buf.append(zs['rain'])
                 soil_buf.append(zs['soil'])
-                
+
                 if step < min_warmup:
                     continue
-                
-                active_sensors = int((1 - dropout_rate) * self.config['sensors']['per_zone'])
-                total_sensors = self.config['sensors']['per_zone']
-                health = active_sensors / total_sensors if total_sensors > 0 else 1.0
-                
-                water_slope = water_buf.slope(5)
-                consensus = 0.5 + 0.5 * np.tanh(water_slope * 10) + rng.normal(0, 0.1)
-                consensus = np.clip(consensus, 0, 1)
-                
+
+                meta = zone_step_meta[zone.zone_id][step]
+
                 features = {
                     'episode_id': episode_id,
                     'step': step,
@@ -168,17 +193,17 @@ class DataGenerator:
                     'dropout_rate': dropout_rate,
                     'noise_std': noise_std,
                     'water_mean_5': water_buf.mean(5),
-                    'water_slope_5': water_slope,
+                    'water_slope_5': water_buf.slope(5),
                     'water_max_10': water_buf.max(10),
                     'rain_sum_20': rain_buf.sum(20),
                     'rain_mean_10': rain_buf.mean(10),
                     'soil_mean_10': soil_buf.mean(10),
-                    'consensus': consensus,
-                    'health': health,
+                    'consensus': meta['consensus'],
+                    'health': meta['health'],
                     'flood_in_next_T': int(future_flood[zone.zone_id][step])
                 }
                 records.append(features)
-        
+
         return records
 
 

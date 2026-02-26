@@ -102,6 +102,14 @@ class FloodModel(Model):
         self.coordinator.step()
         for mitigation in self.mitigations.values():
             mitigation.step()
+
+        # Record per-step ground truth for each zone (must happen DURING
+        # simulation, not after, to capture the true flood status at each step)
+        for zone_id, edge in self.edges.items():
+            if edge.history:
+                edge.history[-1]['ground_truth_flooded'] = \
+                    self.environment.is_flooded(zone_id)
+
         self.step_count += 1
     
     def run(self, steps: int) -> pd.DataFrame:
@@ -117,17 +125,18 @@ class FloodModel(Model):
         return self.get_logs()
     
     def get_logs(self) -> pd.DataFrame:
-        """Compile logs from all agents into DataFrame."""
+        """Compile logs from all agents into DataFrame.
+
+        Ground truth ``ground_truth_flooded`` is recorded per-step during
+        ``step()`` so that it reflects the actual flood status at each
+        simulation step rather than only the final state.
+        """
         records = []
-        
+
         for zone_id, edge in self.edges.items():
             for entry in edge.history:
-                flood_status = self.environment.is_flooded(zone_id)
-                records.append({
-                    **entry,
-                    'ground_truth_flooded': flood_status
-                })
-        
+                records.append(entry)
+
         if records:
             return pd.DataFrame(records)
         return pd.DataFrame()
@@ -153,6 +162,23 @@ class FloodModel(Model):
     def generate_random_rainfall(self, scenario: str = 'normal'):
         """Generate random rainfall based on scenario."""
         self.environment.generate_random_rainfall(scenario)
+
+
+def steps_to_real_time(steps: int, config: dict) -> str:
+    """Convert simulation steps to human-readable real-world time.
+
+    Uses ``step_duration_minutes`` from *config* (default 15 min per step).
+    Returns a string like ``"2h 30min"`` or ``"4d 4h 0min"``.
+    """
+    minutes_per_step = config.get('step_duration_minutes', 15)
+    total_minutes = steps * minutes_per_step
+    days, remainder = divmod(total_minutes, 1440)
+    hours, minutes = divmod(remainder, 60)
+    if days > 0:
+        return f"{int(days)}d {int(hours)}h {int(minutes)}min"
+    if hours > 0:
+        return f"{int(hours)}h {int(minutes)}min"
+    return f"{int(minutes)}min"
 
 
 def load_config(config_path: str) -> dict:
@@ -239,7 +265,8 @@ def main():
     model.generate_random_rainfall(rainfall_type)
     
     steps = args.steps or config['simulation']['steps_per_episode']
-    logger.info(f"Running simulation for {steps} steps with scenario '{args.scenario}'")
+    real_time = steps_to_real_time(steps, config)
+    logger.info(f"Running simulation for {steps} steps (~{real_time} real-world) with scenario '{args.scenario}'")
     
     logs = model.run(steps)
     

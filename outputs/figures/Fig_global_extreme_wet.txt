@@ -1,3 +1,0 @@
-- global_risk: agregirani rizik koordinatora
-- global_alarm: globalna uzbuna (0/1)
-- X osa: simulation step (vrijeme)

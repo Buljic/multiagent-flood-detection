@@ -4,6 +4,7 @@ Runs multiple scenarios and collects comprehensive metrics.
 """
 
 import argparse
+import copy
 import json
 import yaml
 import numpy as np
@@ -14,10 +15,12 @@ import joblib
 import logging
 from tqdm import tqdm
 
-import sys
 import hashlib
 from datetime import datetime
-sys.path.insert(0, str(Path(__file__).parent.parent))
+import sys
+_project_root = str(Path(__file__).parent.parent)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 from sim.model import FloodModel
 from baseline.threshold import ZonedThresholdBaseline
@@ -51,7 +54,7 @@ class ExperimentRunner:
         Returns:
             Dict with scenario results
         """
-        scenario_config = self.config.copy()
+        scenario_config = copy.deepcopy(self.config)
         
         if 'dropout_rate' in scenario:
             scenario_config['sensors']['dropout_rate'] = scenario['dropout_rate']

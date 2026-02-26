@@ -1,5 +1,0 @@
-- X osa: simulation step (vrijeme)
-- Linija 'risk': ML vjerovatnoća poplave
-- TH_UP/TH_DOWN: guardrails pragovi (hysteresis)
-- ALERT(state): kada sistem uđe u ALERT
-- ground_truth: stvarni flood event (ako postoji kolona)

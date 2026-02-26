@@ -112,15 +112,19 @@ class AlertStateMachine:
     def update(self, risk: float, consensus: float, health: float) -> AlertState:
         """
         Update state machine based on risk score, consensus, and health.
-        
+
         Args:
             risk: ML model risk score [0, 1]
             consensus: Fraction of sensors showing rising trend [0, 1]
             health: Fraction of operational sensors [0, 1]
-        
+
         Returns:
             Current alert state after update
         """
+        risk = float(np.clip(risk, 0.0, 1.0))
+        consensus = float(np.clip(consensus, 0.0, 1.0))
+        health = float(np.clip(health, 0.0, 1.0))
+
         self.is_degraded = health < self.config.HEALTH_MIN
         th_up, th_down, k_up = self.get_effective_thresholds()
         

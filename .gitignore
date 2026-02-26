@@ -1,6 +1,10 @@
 # Internal documentation (not for public repo)
 projectDescription.md
 CONCEPTS.md
+EVERYTHING_EXPLAINED.md
+IEEE_SECTIONS.md
+IEEE_PAPER.md
+notes/multiagent-system.md
 
 # Python
 __pycache__/
@@ -62,3 +66,6 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+
+CHANGELOG.md

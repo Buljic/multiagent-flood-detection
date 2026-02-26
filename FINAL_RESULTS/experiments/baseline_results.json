@@ -1,0 +1,226 @@
+{
+  "normal_wet": {
+    "scenario": "normal_wet",
+    "mas_detection_alert_only": {
+      "TP": 0,
+      "FP": 0,
+      "FN": 0,
+      "TN": 1200,
+      "precision": null,
+      "recall": null,
+      "f1": null
+    },
+    "baseline_detection": {
+      "TP": 0,
+      "FP": 0,
+      "FN": 0,
+      "TN": 1200,
+      "precision": null,
+      "recall": null,
+      "f1": null
+    },
+    "mas_early_warning_coverage": {
+      "TP": 0,
+      "FP": 0,
+      "FN": 0,
+      "TN": 1200,
+      "precision": null,
+      "recall": null,
+      "f1": null
+    },
+    "mas_global_alarm_toggles": 0,
+    "baseline_global_alarm_toggles": 0,
+    "mas_zone_alert_toggles": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0
+    },
+    "baseline_zone_alert_toggles": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0
+    },
+    "first_flood_step": null,
+    "mas_first_global_alarm_step": null,
+    "baseline_first_alarm_step": null,
+    "mas_detection_delay": null,
+    "baseline_detection_delay": null,
+    "mean_risk": 0.1537,
+    "risk_spikes_above_TH_UP": 71,
+    "mas_alert_steps": 0,
+    "mas_suspected_steps": 0,
+    "baseline_alert_steps": 0,
+    "total_zone_steps": 1200,
+    "total_flooded_zone_steps": 0
+  },
+  "extreme_wet": {
+    "scenario": "extreme_wet",
+    "mas_detection_alert_only": {
+      "TP": 637,
+      "FP": 0,
+      "FN": 563,
+      "TN": 0,
+      "precision": 1.0,
+      "recall": 0.5308,
+      "f1": 0.6935
+    },
+    "baseline_detection": {
+      "TP": 152,
+      "FP": 0,
+      "FN": 1044,
+      "TN": 4,
+      "precision": 1.0,
+      "recall": 0.1271,
+      "f1": 0.2255
+    },
+    "mas_early_warning_coverage": {
+      "TP": 699,
+      "FP": 0,
+      "FN": 501,
+      "TN": 0,
+      "precision": 1.0,
+      "recall": 0.5825,
+      "f1": 0.7362
+    },
+    "mas_global_alarm_toggles": 1,
+    "baseline_global_alarm_toggles": 2,
+    "mas_zone_alert_toggles": {
+      "0": 1,
+      "1": 1,
+      "2": 2,
+      "3": 4
+    },
+    "baseline_zone_alert_toggles": {
+      "0": 2,
+      "1": 2,
+      "2": 2,
+      "3": 2
+    },
+    "first_flood_step": 1,
+    "mas_first_global_alarm_step": 52,
+    "baseline_first_alarm_step": 74,
+    "mas_detection_delay": 51,
+    "baseline_detection_delay": 73,
+    "mean_risk": 0.6569,
+    "risk_spikes_above_TH_UP": 768,
+    "mas_alert_steps": 637,
+    "mas_suspected_steps": 62,
+    "baseline_alert_steps": 152,
+    "total_zone_steps": 1200,
+    "total_flooded_zone_steps": 1200
+  },
+  "extreme_dropout_50": {
+    "scenario": "extreme_dropout_50",
+    "mas_detection_alert_only": {
+      "TP": 615,
+      "FP": 0,
+      "FN": 585,
+      "TN": 0,
+      "precision": 1.0,
+      "recall": 0.5125,
+      "f1": 0.6777
+    },
+    "baseline_detection": {
+      "TP": 152,
+      "FP": 0,
+      "FN": 1044,
+      "TN": 4,
+      "precision": 1.0,
+      "recall": 0.1271,
+      "f1": 0.2255
+    },
+    "mas_early_warning_coverage": {
+      "TP": 689,
+      "FP": 0,
+      "FN": 511,
+      "TN": 0,
+      "precision": 1.0,
+      "recall": 0.5742,
+      "f1": 0.7295
+    },
+    "mas_global_alarm_toggles": 1,
+    "baseline_global_alarm_toggles": 2,
+    "mas_zone_alert_toggles": {
+      "0": 1,
+      "1": 1,
+      "2": 2,
+      "3": 2
+    },
+    "baseline_zone_alert_toggles": {
+      "0": 2,
+      "1": 2,
+      "2": 2,
+      "3": 2
+    },
+    "first_flood_step": 1,
+    "mas_first_global_alarm_step": 57,
+    "baseline_first_alarm_step": 74,
+    "mas_detection_delay": 56,
+    "baseline_detection_delay": 73,
+    "mean_risk": 0.6943,
+    "risk_spikes_above_TH_UP": 829,
+    "mas_alert_steps": 615,
+    "mas_suspected_steps": 74,
+    "baseline_alert_steps": 152,
+    "total_zone_steps": 1200,
+    "total_flooded_zone_steps": 1200
+  },
+  "extreme_dry": {
+    "scenario": "extreme_dry",
+    "mas_detection_alert_only": {
+      "TP": 588,
+      "FP": 0,
+      "FN": 612,
+      "TN": 0,
+      "precision": 1.0,
+      "recall": 0.49,
+      "f1": 0.6577
+    },
+    "baseline_detection": {
+      "TP": 152,
+      "FP": 0,
+      "FN": 1044,
+      "TN": 4,
+      "precision": 1.0,
+      "recall": 0.1271,
+      "f1": 0.2255
+    },
+    "mas_early_warning_coverage": {
+      "TP": 656,
+      "FP": 0,
+      "FN": 544,
+      "TN": 0,
+      "precision": 1.0,
+      "recall": 0.5467,
+      "f1": 0.7069
+    },
+    "mas_global_alarm_toggles": 1,
+    "baseline_global_alarm_toggles": 2,
+    "mas_zone_alert_toggles": {
+      "0": 1,
+      "1": 1,
+      "2": 2,
+      "3": 4
+    },
+    "baseline_zone_alert_toggles": {
+      "0": 2,
+      "1": 2,
+      "2": 2,
+      "3": 2
+    },
+    "first_flood_step": 1,
+    "mas_first_global_alarm_step": 62,
+    "baseline_first_alarm_step": 74,
+    "mas_detection_delay": 61,
+    "baseline_detection_delay": 73,
+    "mean_risk": 0.5955,
+    "risk_spikes_above_TH_UP": 678,
+    "mas_alert_steps": 588,
+    "mas_suspected_steps": 68,
+    "baseline_alert_steps": 152,
+    "total_zone_steps": 1200,
+    "total_flooded_zone_steps": 1200
+  }
+}

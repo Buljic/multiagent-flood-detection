@@ -1,2 +1,0 @@
-- Confusion matrix iz final_report.json (test set)
-- [[TN, FP],[FN, TP]]

@@ -1,4 +1,0 @@
-scenario,mean_risk,alert_steps_total,first_global_alarm_step,first_flood_step,lead_time_steps
-normal_wet,0.15367804969162105,0,,,
-extreme_wet,0.6568704675147558,637,52.0,,
-extreme_dropout_50,0.6942756756227605,615,57.0,,

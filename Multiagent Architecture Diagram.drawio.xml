@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.8">
+  <diagram name="Page-1" id="u0vQWWNDZN27ARNGXZOP">
+    <mxGraphModel dx="1601" dy="789" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Simulator / Environment&#xa;(multi-zone dynamics, step-based)" vertex="1">
+          <mxGeometry height="70" width="260" x="60" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="Sensor Agents (per zone)&#xa;water level + rainfall&#xa;+ noise &amp; dropout" vertex="1">
+          <mxGeometry height="90" width="260" x="60" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;dashed=1;fontSize=12;" value="Per-Zone Edge Processing (repeat for each zone)" vertex="1">
+          <mxGeometry height="350" width="470" x="350" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" value="Rolling Feature Builder&#xa;(e.g., water_mean_5,&#xa; rain_sum_20, trends)" vertex="1">
+          <mxGeometry height="90" width="160" x="395" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="Calibrated ML Risk Model&#xa;(RandomForest / GBDT&#xa;+ probability calibration)" vertex="1">
+          <mxGeometry height="90" width="140" x="630" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" value="Guardrails State Machine&#xa;hysteresis + debouncing&#xa;consensus gate + health-aware" vertex="1">
+          <mxGeometry height="80" width="320" x="450" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Coordinator Agent&#xa;(fuse zone states)&#xa;Stable Global Alarm" vertex="1">
+          <mxGeometry height="90" width="270" x="830" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="Outputs&#xa;Global Alarm + Zone States&#xa;Logs/Traces (Parquet)" vertex="1">
+          <mxGeometry height="90" width="260" x="850" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" value="Threshold Baseline (comparison)&#xa;ALERT if water_mean_5 &gt; water_threshold&#xa;AND rain_sum_20 &gt; rain_threshold&#xa;(min hysteresis + 2-step debounce)" vertex="1">
+          <mxGeometry height="110" width="660" x="50" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-10" edge="1" parent="1" source="eUSlZsxrKJ8Zie-OJ7Eh-1" style="endArrow=block;html=1;rounded=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-2" value="update each step">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-11" edge="1" parent="1" source="eUSlZsxrKJ8Zie-OJ7Eh-2" style="endArrow=block;html=1;rounded=0;exitX=0.832;exitY=0.026;exitDx=0;exitDy=0;exitPerimeter=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-4" value="zone readings">
+          <mxGeometry relative="1" x="0.2013" y="-1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="276" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-12" edge="1" parent="1" source="eUSlZsxrKJ8Zie-OJ7Eh-4" style="endArrow=block;html=1;rounded=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-5" value="features">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-13" edge="1" parent="1" source="eUSlZsxrKJ8Zie-OJ7Eh-5" style="endArrow=block;html=1;rounded=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-6" value="risk p">
+          <mxGeometry relative="1" x="0.3529" y="4" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="650" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-14" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;" value="zone state + health">
+          <mxGeometry relative="1" x="0.4395" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="900" y="331.17" />
+            </Array>
+            <mxPoint x="770" y="331.17" as="sourcePoint" />
+            <mxPoint x="900" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-15" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-8" value="global alarm">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="140" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-16" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;entryX=0.193;entryY=0.031;entryDx=0;entryDy=0;entryPerimeter=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-8" value="zone alarms">
+          <mxGeometry relative="1" x="0.4098" as="geometry">
+            <mxPoint y="1" as="offset" />
+            <Array as="points">
+              <mxPoint x="900" y="340" />
+            </Array>
+            <mxPoint x="770" y="340" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-17" edge="1" parent="1" source="eUSlZsxrKJ8Zie-OJ7Eh-4" style="endArrow=block;html=1;rounded=0;exitX=0.164;exitY=1.049;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.551;entryY=-0.009;entryDx=0;entryDy=0;entryPerimeter=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-9" value="same rolling features">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eUSlZsxrKJ8Zie-OJ7Eh-18" edge="1" parent="1" source="eUSlZsxrKJ8Zie-OJ7Eh-9" style="endArrow=block;html=1;dashed=1;rounded=0;" target="eUSlZsxrKJ8Zie-OJ7Eh-8" value="baseline alarm / states">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

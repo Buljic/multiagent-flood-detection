@@ -119,7 +119,8 @@ class EdgeAggregatorAgent(Agent):
         readings = []
         active_count = 0
         rising_count = 0
-        
+        total_penalty = 0.0
+
         for sensor in self.sensors:
             reading = sensor.get_reading()
             if reading is not None:
@@ -129,12 +130,17 @@ class EdgeAggregatorAgent(Agent):
                 reading['water'] = self.outlier_clipper.clip(processed_water)
                 readings.append(reading)
                 active_count += 1
+                total_penalty += penalty
                 if sensor.trend_rising:
                     rising_count += 1
             else:
                 _, penalty = self.missing_handler.process(sensor.unique_id, None)
-        
-        self.health = active_count / len(self.sensors) if self.sensors else 0.0
+                total_penalty += penalty
+
+        # Base health from active sensor ratio, reduced by carry-forward penalties
+        base_health = active_count / len(self.sensors) if self.sensors else 0.0
+        avg_penalty = total_penalty / len(self.sensors) if self.sensors else 0.0
+        self.health = max(0.0, base_health - avg_penalty)
         self.consensus = rising_count / active_count if active_count > 0 else 0.0
         
         if readings:
@@ -147,15 +153,13 @@ class EdgeAggregatorAgent(Agent):
         self.current_features = self.feature_extractor.extract(self.consensus, self.health)
         
         if self.ml_model is not None:
+            feature_names = self.config.get('ml', {}).get('features', [
+                'water_mean_5', 'water_slope_5', 'water_max_10',
+                'rain_sum_20', 'rain_mean_10', 'soil_mean_10',
+                'consensus', 'health'
+            ])
             feature_vector = np.array([[
-                self.current_features['water_mean_5'],
-                self.current_features['water_slope_5'],
-                self.current_features['water_max_10'],
-                self.current_features['rain_sum_20'],
-                self.current_features['rain_mean_10'],
-                self.current_features['soil_mean_10'],
-                self.current_features['consensus'],
-                self.current_features['health']
+                self.current_features[f] for f in feature_names
             ]])
             self.current_risk = self.ml_model.predict_proba(feature_vector)[0, 1]
         else:
@@ -248,9 +252,10 @@ class CoordinatorAgent(Agent):
             'step': self.model.environment.current_step,
             'global_risk': self.global_risk,
             'global_alarm': self.global_alarm,
-            'zones_in_alert': str(self.zones_in_alert),
-            'zone_risks': str({s['zone_id']: s['risk'] for s in statuses}),
-            'zone_states': str({s['zone_id']: s['state'].value for s in statuses})
+            'num_zones_in_alert': len(self.zones_in_alert),
+            'zones_in_alert': list(self.zones_in_alert),
+            'zone_risks': {s['zone_id']: s['risk'] for s in statuses},
+            'zone_states': {s['zone_id']: s['state'].value for s in statuses}
         })
     
     def get_global_status(self) -> Dict[str, Any]:
@@ -306,17 +311,16 @@ class MitigationAgent(Agent):
         
         if edge.current_state == AlertState.ALERT:
             self._activate_pump()
-            if edge.zone_id == 0:
+            # Activate gate for river zones (upstream inflow control)
+            zone = self.model.environment.zones[self.zone_id]
+            if zone.is_river_zone:
                 self._activate_gate()
         elif edge.current_state == AlertState.NORMAL:
             self._deactivate_all()
     
     def _get_zone_edge(self) -> Optional[EdgeAggregatorAgent]:
         """Find the edge aggregator for this zone."""
-        for agent in self.model.schedule.agents:
-            if isinstance(agent, EdgeAggregatorAgent) and agent.zone_id == self.zone_id:
-                return agent
-        return None
+        return self.model.edges.get(self.zone_id)
     
     def _activate_pump(self):
         """Activate pump to reduce water level."""
