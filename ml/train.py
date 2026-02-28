@@ -73,7 +73,7 @@ class ModelTrainer:
             rng = np.random.default_rng(self.random_state)
             rng.shuffle(episodes)
             
-            n_test = int(len(episodes) * 0.2)
+            n_test = max(1, int(len(episodes) * 0.2))
             test_episodes = episodes[:n_test]
             train_episodes = episodes[n_test:]
             
@@ -237,6 +237,16 @@ class ModelTrainer:
                     'cv_auc_std': float('nan'),
                     'cv_scores': []
                 }
+            elif len(np.unique(y)) < 2:
+                logger.warning(
+                    "Only one class in target — skipping grouped CV "
+                    "(need both classes for roc_auc scoring)"
+                )
+                return {
+                    'cv_auc_mean': float('nan'),
+                    'cv_auc_std': float('nan'),
+                    'cv_scores': []
+                }
             else:
                 actual_cv = min(cv, n_groups)
                 gkf = GroupKFold(n_splits=actual_cv)
@@ -245,7 +255,20 @@ class ModelTrainer:
                 )
                 logger.info(f"GroupKFold CV ({actual_cv} folds, {n_groups} episodes)")
         else:
-            scores = cross_val_score(base_model, X, y, cv=cv, scoring='roc_auc')
+            if len(np.unique(y)) < 2:
+                logger.warning(
+                    "Only one class in target — skipping CV "
+                    "(need both classes for roc_auc scoring)"
+                )
+                return {
+                    'cv_auc_mean': float('nan'),
+                    'cv_auc_std': float('nan'),
+                    'cv_scores': []
+                }
+            actual_cv = min(cv, len(y))
+            scores = cross_val_score(
+                base_model, X, y, cv=actual_cv, scoring='roc_auc'
+            )
 
         result = {
             'cv_auc_mean': float(scores.mean()),

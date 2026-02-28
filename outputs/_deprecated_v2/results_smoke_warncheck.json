@@ -1,0 +1,1865 @@
+{
+  "run_metadata": {
+    "timestamp": "2026-02-27T05:10:42.008281",
+    "seed": 42,
+    "config_hash": "db70f198",
+    "model_hash": "5ba986d1",
+    "num_scenarios": 8,
+    "repeats_per_scenario": 1,
+    "guardrails_params": {
+      "TH_UP": 0.6,
+      "TH_DOWN": 0.4,
+      "K_UP": 3,
+      "K_DOWN": 5,
+      "CONS_MIN": 0.5,
+      "HEALTH_MIN": 0.6,
+      "degraded_TH_UP": 0.7,
+      "degraded_K_UP": 5
+    },
+    "baseline_params": {
+      "water_threshold": 0.5,
+      "rain_threshold": 2.0
+    },
+    "sensor_params": {
+      "noise_std": 0.05,
+      "dropout_rate": 0.1,
+      "per_zone": 5
+    },
+    "ml_horizon_T": 10
+  },
+  "scenarios": [
+    {
+      "scenario_name": "normal_dry",
+      "scenario_config": {
+        "name": "normal_dry",
+        "rainfall_type": "normal",
+        "soil_saturation_init": 0.2,
+        "dropout_rate": 0.0,
+        "noise_level": "low"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "normal_dry",
+            "rainfall_type": "normal",
+            "soil_saturation_init": 0.2,
+            "dropout_rate": 0.0,
+            "noise_level": "low"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 0,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario_name": "normal_wet",
+      "scenario_config": {
+        "name": "normal_wet",
+        "rainfall_type": "normal",
+        "soil_saturation_init": 0.6,
+        "dropout_rate": 0.0,
+        "noise_level": "low"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "normal_wet",
+            "rainfall_type": "normal",
+            "soil_saturation_init": 0.6,
+            "dropout_rate": 0.0,
+            "noise_level": "low"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 0,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario_name": "extreme_dry",
+      "scenario_config": {
+        "name": "extreme_dry",
+        "rainfall_type": "extreme",
+        "soil_saturation_init": 0.2,
+        "dropout_rate": 0.0,
+        "noise_level": "low"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "extreme_dry",
+            "rainfall_type": "extreme",
+            "soil_saturation_init": 0.2,
+            "dropout_rate": 0.0,
+            "noise_level": "low"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 0,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario_name": "extreme_wet",
+      "scenario_config": {
+        "name": "extreme_wet",
+        "rainfall_type": "extreme",
+        "soil_saturation_init": 0.7,
+        "dropout_rate": 0.0,
+        "noise_level": "low"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "extreme_wet",
+            "rainfall_type": "extreme",
+            "soil_saturation_init": 0.7,
+            "dropout_rate": 0.0,
+            "noise_level": "low"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 0,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario_name": "extreme_dropout_10",
+      "scenario_config": {
+        "name": "extreme_dropout_10",
+        "rainfall_type": "extreme",
+        "soil_saturation_init": 0.5,
+        "dropout_rate": 0.1,
+        "noise_level": "low"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "extreme_dropout_10",
+            "rainfall_type": "extreme",
+            "soil_saturation_init": 0.5,
+            "dropout_rate": 0.1,
+            "noise_level": "low"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 0,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario_name": "extreme_dropout_30",
+      "scenario_config": {
+        "name": "extreme_dropout_30",
+        "rainfall_type": "extreme",
+        "soil_saturation_init": 0.5,
+        "dropout_rate": 0.3,
+        "noise_level": "low"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "extreme_dropout_30",
+            "rainfall_type": "extreme",
+            "soil_saturation_init": 0.5,
+            "dropout_rate": 0.3,
+            "noise_level": "low"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 0,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario_name": "extreme_dropout_50",
+      "scenario_config": {
+        "name": "extreme_dropout_50",
+        "rainfall_type": "extreme",
+        "soil_saturation_init": 0.5,
+        "dropout_rate": 0.5,
+        "noise_level": "low"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "extreme_dropout_50",
+            "rainfall_type": "extreme",
+            "soil_saturation_init": 0.5,
+            "dropout_rate": 0.5,
+            "noise_level": "low"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 0,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "scenario_name": "extreme_noisy",
+      "scenario_config": {
+        "name": "extreme_noisy",
+        "rainfall_type": "extreme",
+        "soil_saturation_init": 0.5,
+        "dropout_rate": 0.1,
+        "noise_level": "high"
+      },
+      "runs": [
+        {
+          "scenario": {
+            "name": "extreme_noisy",
+            "rainfall_type": "extreme",
+            "soil_saturation_init": 0.5,
+            "dropout_rate": 0.1,
+            "noise_level": "high"
+          },
+          "mas": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.1,
+              "accuracy": 0.9,
+              "confusion_matrix": [
+                [
+                  36,
+                  4
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 1,
+              "avg_state_changes_per_zone": 0.25,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.1
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "baseline": {
+            "detection": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "false_positive_rate": 0.0,
+              "accuracy": 1.0,
+              "confusion_matrix": [
+                [
+                  40,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "stability": {
+              "total_state_changes": 0,
+              "avg_state_changes_per_zone": 0.0,
+              "flapping_rate": 0.0,
+              "time_in_alert": 0.0
+            },
+            "lead_time": {
+              "mean": 0.0,
+              "median": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "count": 0
+            }
+          },
+          "mas_state_changes": 1,
+          "baseline_state_changes": 0,
+          "repeat": 0
+        }
+      ],
+      "aggregated": {
+        "mas": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.1,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 0.9,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.25,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.1,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        },
+        "baseline": {
+          "detection": {
+            "precision": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "recall": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "false_positive_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "accuracy": {
+              "mean": 1.0,
+              "std": 0.0
+            }
+          },
+          "stability": {
+            "total_state_changes": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "avg_state_changes_per_zone": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "flapping_rate": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "time_in_alert": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          },
+          "lead_time": {
+            "mean": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "median": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "std": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "min": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "max": {
+              "mean": 0.0,
+              "std": 0.0
+            },
+            "count": {
+              "mean": 0.0,
+              "std": 0.0
+            }
+          }
+        }
+      }
+    }
+  ],
+  "summary": {
+    "mas_avg_f1": 0.0,
+    "baseline_avg_f1": 0.0,
+    "f1_improvement": 0.0,
+    "mas_avg_state_changes": 0.125,
+    "baseline_avg_state_changes": 0.0,
+    "stability_improvement": -0.125,
+    "num_scenarios": 8
+  }
+}

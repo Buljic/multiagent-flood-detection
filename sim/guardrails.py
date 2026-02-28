@@ -171,14 +171,6 @@ class AlertStateMachine:
             self.consecutive_down = 0
             self.state_changes += 1
     
-    def get_state_numeric(self) -> int:
-        """Get numeric representation of current state."""
-        return {
-            AlertState.NORMAL: 0,
-            AlertState.SUSPECTED: 1,
-            AlertState.ALERT: 2,
-            AlertState.COOLDOWN: 3
-        }[self.state]
 
 
 class OutlierClipper:

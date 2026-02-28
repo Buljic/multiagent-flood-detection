@@ -232,7 +232,15 @@ class MetricsCalculator:
             # alerts in one zone with floods in a different zone.
             all_lead_times = []
 
-            for zone_id in sorted(logs['zone_id'].unique()):
+            if 'zone_id' in logs.columns:
+                zone_ids = sorted(logs['zone_id'].unique())
+            else:
+                # Single-zone fallback: treat all rows as one zone
+                logs = logs.copy()
+                logs['zone_id'] = 0
+                zone_ids = [0]
+
+            for zone_id in zone_ids:
                 zone_logs = logs[logs['zone_id'] == zone_id].sort_values('step')
 
                 zone_alerts = []

@@ -92,6 +92,11 @@ class FloodEnvironment:
                 f"num_zones={self.num_zones} is not a perfect square. "
                 f"Zone grid requires a perfect square (e.g. 4, 9, 16)."
             )
+        if sqrt_nz > self.grid_size:
+            raise ValueError(
+                f"num_zones={self.num_zones} too large for grid_size={self.grid_size}. "
+                f"sqrt(num_zones)={sqrt_nz} must be <= grid_size={self.grid_size}."
+            )
         self.zones: List[Zone] = []
         zone_rows = self.grid_size // sqrt_nz
         zone_cols = self.grid_size // sqrt_nz

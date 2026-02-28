@@ -9,7 +9,14 @@
       "Bash(python -W error -c \"import eval; import sim; import ml; print\\(''OK''\\)\")",
       "Bash(C:/Python312/python.exe -m pytest tests/test_system.py -v)",
       "Bash(find /c/Users/enit-024/Desktop/Fakultet/NaucniRad/Imad_Goran_Nermin/MultiAgent_Flood_Detection -name \"*.py\" -type f -exec grep -l \"ground_truth[^_]\" {} ;)",
-      "Bash(grep -rn \"assert\\\\|raise\\\\|except\" /c/Users/enit-024/Desktop/Fakultet/NaucniRad/Imad_Goran_Nermin/MultiAgent_Flood_Detection/sim/*.py)"
+      "Bash(grep -rn \"assert\\\\|raise\\\\|except\" /c/Users/enit-024/Desktop/Fakultet/NaucniRad/Imad_Goran_Nermin/MultiAgent_Flood_Detection/sim/*.py)",
+      "Bash(python3 -c \"from sklearn.ensemble import RandomForestClassifier; import numpy as np; import pandas as pd; X = pd.DataFrame\\([[0.5]*8]*10, columns=[''a'']*8\\); y = np.array\\([0]*10\\); model = RandomForestClassifier\\(\\).fit\\(X, y\\); print\\(''predict_proba shape:'', model.predict_proba\\(X\\).shape\\)\")",
+      "Bash(python -m pytest tests/test_system.py -v)",
+      "Bash(python -m pytest tests/test_system.py::TestExperimentRunner::test_sensor_reading_not_mutated_by_edge -v)",
+      "Bash(xargs wc -l)",
+      "Bash(python -c \"from sim.agents import SensorAgent; from sim.guardrails import AlertStateMachine; print\\(''Import OK''\\)\")",
+      "Bash(python run_pipeline.py)",
+      "Bash(python -c \":*)"
     ]
   }
 }

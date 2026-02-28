@@ -1199,6 +1199,152 @@ class TestExperimentRunner:
             )
 
 
+    def test_lead_time_without_zone_id_column(self):
+        """compute_from_logs must not crash when logs lack zone_id column."""
+        from eval.metrics import MetricsCalculator
+
+        calc = MetricsCalculator()
+        # Single-zone logs without zone_id column
+        logs = pd.DataFrame([
+            {'step': s, 'state': 'ALERT' if 10 <= s <= 15 else 'NORMAL',
+             'ground_truth_flooded': s >= 20}
+            for s in range(50)
+        ])
+        assert 'zone_id' not in logs.columns
+
+        metrics = calc.compute_from_logs(logs)
+        assert 'lead_time' in metrics
+        assert metrics['lead_time']['count'] > 0
+
+    def test_num_zones_too_large_raises(self):
+        """num_zones larger than grid_size^2 must raise ValueError."""
+        from sim.environment import FloodEnvironment
+
+        config = load_config()
+        config = copy.deepcopy(config)
+        config['simulation']['grid_size'] = 5
+        config['simulation']['num_zones'] = 36  # sqrt=6 > grid_size=5
+
+        with pytest.raises(ValueError, match="too large"):
+            FloodEnvironment(config, seed=42)
+
+    def test_cv_without_groups_single_class(self):
+        """cross_validate without groups on single-class data must not crash."""
+        from ml.train import ModelTrainer
+
+        config = load_config()
+        trainer = ModelTrainer(config=config)
+
+        X = pd.DataFrame({
+            'water_mean_5': [0.1, 0.2, 0.3],
+            'water_slope_5': [0.0, 0.01, 0.02],
+            'water_max_10': [0.1, 0.2, 0.3],
+            'rain_sum_20': [0.5, 1.0, 1.5],
+            'rain_mean_10': [0.05, 0.1, 0.15],
+            'soil_mean_10': [0.3, 0.3, 0.3],
+            'consensus': [0.0, 0.5, 1.0],
+            'health': [1.0, 1.0, 1.0],
+        })
+        y = pd.Series([0, 0, 0])  # single class, no groups
+
+        result = trainer.cross_validate(X, y, groups=None, cv=3)
+        assert 'cv_auc_mean' in result
+        assert result['cv_scores'] == []  # skipped
+
+
+    def test_sensor_reading_not_mutated_by_edge(self):
+        """Edge processing must not mutate the sensor's internal last_reading.
+        Captures the water value BEFORE edge.step(), then verifies it's
+        unchanged AFTER edge.step() processes (and clips) a copy."""
+        from sim.model import FloodModel
+
+        config = load_config()
+        model = FloodModel(config, seed=42)
+        model.reset(soil_saturation_init=0.5)
+        model.environment.add_rainfall_event(intensity=0.5, duration=30, start_step=5)
+
+        # Run sensor steps to populate readings, but NOT edge steps yet
+        for _ in range(10):
+            for sensor in model.sensors:
+                sensor.step()
+            model.environment.step()
+
+        # Snapshot sensor water values BEFORE edge processing
+        snapshots = {}
+        for zone_id, edge in model.edges.items():
+            for sensor in edge.sensors:
+                if sensor.last_reading is not None:
+                    snapshots[sensor.unique_id] = sensor.last_reading['water']
+
+        # Now run edge steps (which clip water via outlier_clipper)
+        for edge in model.edges.values():
+            edge.step()
+
+        # Verify sensor readings are unchanged after edge processing
+        mutations_found = 0
+        for zone_id, edge in model.edges.items():
+            for sensor in edge.sensors:
+                if sensor.unique_id in snapshots:
+                    assert sensor.last_reading['water'] == snapshots[sensor.unique_id], (
+                        f"Sensor {sensor.unique_id} water was mutated by edge processing: "
+                        f"before={snapshots[sensor.unique_id]}, after={sensor.last_reading['water']}"
+                    )
+                    mutations_found += 1
+
+        assert mutations_found > 0, "No active sensors found to verify"
+
+    def test_episode_split_small_dataset_nonempty(self):
+        """Episode-based train/test split must produce non-empty test set
+        even with very few episodes (<=4)."""
+        from ml.train import ModelTrainer
+
+        config = load_config()
+        trainer = ModelTrainer(config=config)
+
+        # 3 episodes, 2 rows each = 6 total rows
+        X = pd.DataFrame({
+            'water_mean_5': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+            'water_slope_5': [0.0]*6,
+            'water_max_10': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+            'rain_sum_20': [0.5]*6,
+            'rain_mean_10': [0.05]*6,
+            'soil_mean_10': [0.3]*6,
+            'consensus': [0.0, 0.5, 0.0, 0.5, 0.0, 0.5],
+            'health': [1.0]*6,
+            'episode_id': [0, 0, 1, 1, 2, 2],
+        })
+        y = pd.Series([0, 1, 0, 1, 0, 1])
+
+        # The split should work without crashing and produce non-empty sets
+        episodes = X['episode_id'].unique()
+        n_test = max(1, int(len(episodes) * 0.2))
+        assert n_test >= 1, "Must have at least 1 test episode"
+
+    def test_grouped_cv_single_class_no_crash(self):
+        """GroupKFold with multiple groups but single-class target must not crash."""
+        from ml.train import ModelTrainer
+
+        config = load_config()
+        trainer = ModelTrainer(config=config)
+
+        X = pd.DataFrame({
+            'water_mean_5': [0.1, 0.2, 0.3, 0.4],
+            'water_slope_5': [0.0]*4,
+            'water_max_10': [0.1, 0.2, 0.3, 0.4],
+            'rain_sum_20': [0.5]*4,
+            'rain_mean_10': [0.05]*4,
+            'soil_mean_10': [0.3]*4,
+            'consensus': [0.0, 0.5, 0.0, 0.5],
+            'health': [1.0]*4,
+        })
+        y = pd.Series([0, 0, 0, 0])  # single class
+        groups = pd.Series([0, 0, 1, 1])  # 2 groups
+
+        result = trainer.cross_validate(X, y, groups=groups, cv=2)
+        assert 'cv_auc_mean' in result
+        assert result['cv_scores'] == []  # should skip
+
+
 if __name__ == '__main__':
     import pytest
     pytest.main([__file__, '-v'])

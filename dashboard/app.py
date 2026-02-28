@@ -249,9 +249,13 @@ def render_lead_time_distribution(logs: pd.DataFrame):
     if logs.empty or 'ground_truth_flooded' not in logs.columns:
         st.warning("No data available for lead time analysis.")
         return
-    
+
+    if 'zone_id' not in logs.columns:
+        st.warning("Log file missing zone_id column.")
+        return
+
     lead_times = []
-    
+
     for zone_id in logs['zone_id'].unique():
         zone_data = logs[logs['zone_id'] == zone_id].sort_values('step')
         

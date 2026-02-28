@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from mesa import Agent
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
 import joblib
 
 from .guardrails import (
@@ -125,6 +124,9 @@ class EdgeAggregatorAgent(Agent):
         for sensor in self.sensors:
             reading = sensor.get_reading()
             if reading is not None:
+                # Copy to avoid mutating sensor's internal last_reading
+                # (which is used for trend detection on next step)
+                reading = dict(reading)
                 processed_water, penalty = self.missing_handler.process(
                     sensor.unique_id, reading['water']
                 )

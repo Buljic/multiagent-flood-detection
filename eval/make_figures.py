@@ -244,13 +244,14 @@ def create_robustness_dropout_figure(results: dict, output_dir: Path):
     
     dropout_scenarios = ['extreme_dropout_10', 'extreme_dropout_30', 'extreme_dropout_50']
     dropout_rates = [0.1, 0.3, 0.5]
-    
+
     mas_f1 = []
     mas_recall = []
     baseline_f1 = []
     baseline_recall = []
-    
-    for scenario_name in dropout_scenarios:
+    present_rates = []
+
+    for scenario_name, rate in zip(dropout_scenarios, dropout_rates):
         scenario = next((s for s in results['scenarios'] if s['scenario_name'] == scenario_name), None)
         if scenario:
             agg = scenario.get('aggregated', {})
@@ -258,8 +259,14 @@ def create_robustness_dropout_figure(results: dict, output_dir: Path):
             mas_recall.append(agg.get('mas', {}).get('detection', {}).get('recall', {}).get('mean', 0))
             baseline_f1.append(agg.get('baseline', {}).get('detection', {}).get('f1', {}).get('mean', 0))
             baseline_recall.append(agg.get('baseline', {}).get('detection', {}).get('recall', {}).get('mean', 0))
-    
-    dropout_pct = [r*100 for r in dropout_rates]
+            present_rates.append(rate)
+
+    if not present_rates:
+        logger.warning("No dropout scenarios found — skipping Fig4")
+        plt.close()
+        return
+
+    dropout_pct = [r*100 for r in present_rates]
     
     ax.plot(dropout_pct, mas_f1, marker='o', linewidth=2, markersize=8, label='MAS F1', color='blue')
     ax.plot(dropout_pct, mas_recall, marker='s', linewidth=2, markersize=8, label='MAS Recall', color='blue', linestyle='--')
@@ -301,28 +308,35 @@ def create_flapping_stability_figure(results: dict, output_dir: Path):
     """Fig5: Flapping/stability comparison."""
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    hero_scenarios = ['normal_wet', 'extreme_wet', 'extreme_dropout_50']
-    
+    candidate_scenarios = ['normal_wet', 'extreme_wet', 'extreme_dropout_50']
+
     mas_changes = []
     baseline_changes = []
-    
-    for scenario_name in hero_scenarios:
+    present_scenarios = []
+
+    for scenario_name in candidate_scenarios:
         scenario = next((s for s in results['scenarios'] if s['scenario_name'] == scenario_name), None)
         if scenario:
             agg = scenario.get('aggregated', {})
             mas_changes.append(agg.get('mas', {}).get('stability', {}).get('total_state_changes', {}).get('mean', 0))
             baseline_changes.append(agg.get('baseline', {}).get('stability', {}).get('total_state_changes', {}).get('mean', 0))
-    
-    x = np.arange(len(hero_scenarios))
+            present_scenarios.append(scenario_name)
+
+    if not present_scenarios:
+        logger.warning("No hero scenarios found — skipping Fig5")
+        plt.close()
+        return
+
+    x = np.arange(len(present_scenarios))
     width = 0.35
-    
+
     bars1 = ax.bar(x - width/2, mas_changes, width, label='MAS', color='blue', alpha=0.7)
     bars2 = ax.bar(x + width/2, baseline_changes, width, label='Baseline', color='orange', alpha=0.7)
     
     ax.set_ylabel('State Changes (count)', fontsize=12)
     ax.set_title('Alert Stability: State Changes Comparison', fontsize=13, fontweight='bold')
     ax.set_xticks(x)
-    ax.set_xticklabels([s.replace('_', '\n') for s in hero_scenarios], fontsize=10)
+    ax.set_xticklabels([s.replace('_', '\n') for s in present_scenarios], fontsize=10)
     ax.legend(loc='upper left', fontsize=10)
     ax.grid(True, axis='y', alpha=0.3)
     

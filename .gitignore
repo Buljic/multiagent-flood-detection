@@ -75,6 +75,9 @@ outputs/figures/*.txt
 outputs/figures/*.csv
 outputs/figures/*.md
 
+# Smoke test temporary output
+outputs/figures_smoke/
+
 # Deprecated v1 outputs (kept for reference, not tracked)
 outputs/_deprecated_v1/
 

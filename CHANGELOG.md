@@ -1,5 +1,118 @@
 # CHANGELOG — MultiAgent Flood Detection System
 
+## v2.6 — Mutation Safety, Split Guards & Figure Resilience (2026-02-28)
+
+Fixes sensor reading mutation by reference, episode split edge cases,
+grouped CV single-class guard, brittle figure generation, and dashboard
+lead-time column access.
+
+Test coverage: 71 → 74 tests.
+
+---
+
+### High
+
+#### 38. Edge processing mutated sensor's internal last_reading
+
+**File:** `sim/agents.py`
+
+`sensor.get_reading()` returned `self.last_reading` by reference.
+Edge code then mutated `reading['water']` (outlier clipping), which
+altered the sensor's internal state used for trend detection on the
+next step.
+
+**Fix:** Copy the reading dict before processing:
+`reading = dict(reading)`.
+
+### Medium
+
+#### 39. Episode split produced empty test set for small datasets
+
+**File:** `ml/train.py`
+
+`n_test = int(len(episodes) * 0.2)` evaluates to 0 for ≤4 episodes,
+causing an empty test set and downstream crashes.
+
+**Fix:** `n_test = max(1, int(len(episodes) * 0.2))`.
+
+#### 40. GroupKFold single-class guard missing in grouped branch
+
+**File:** `ml/train.py`
+
+The ungrouped CV branch had a single-class guard (v2.5 #37), but the
+grouped branch did not. `cross_val_score(..., scoring='roc_auc')` with
+`GroupKFold` and single-class `y` produces NaN scores and warnings.
+
+**Fix:** Added `elif len(np.unique(y)) < 2` guard in the grouped branch.
+
+### Low
+
+#### 41. Figure generation crashed when expected scenarios were missing
+
+**File:** `eval/make_figures.py`
+
+Fig4 (dropout robustness) and Fig5 (scenario comparison) hardcoded
+expected scenario names. If any were missing from results, `KeyError`
+or empty plots resulted.
+
+**Fix:** Track only present scenarios; skip figure with warning if
+none found.
+
+#### 42. Dashboard lead-time assumed zone_id column exists
+
+**File:** `dashboard/app.py`
+
+`render_lead_time_distribution()` accessed `logs['zone_id']` without
+checking the column exists, crashing on logs without zone information.
+
+**Fix:** Added `if 'zone_id' not in logs.columns: return` guard.
+
+---
+
+## v2.5 — Edge-Case Guards (2026-02-28)
+
+Hardens remaining edge cases in metrics, environment validation, and CV.
+
+Test coverage: 68 → 71 tests.
+
+---
+
+### Low
+
+#### 35. Lead-time crashed on logs without zone_id column
+
+**File:** `eval/metrics.py`
+
+`compute_from_logs()` accessed `logs['zone_id']` without checking the
+column exists. Logs without `zone_id` (e.g. manually constructed or
+single-zone data) would raise `KeyError`.
+
+**Fix:** Check `'zone_id' in logs.columns`; if absent, treat all rows
+as a single zone (fallback `zone_id=0`).
+
+#### 36. num_zones validation missed upper bound
+
+**File:** `sim/environment.py`
+
+`num_zones=900` with `grid_size=20` would pass the perfect-square check
+but create `sqrt(900)=30 > 20` zones per row, producing empty zones with
+no grid cells (logically broken state).
+
+**Fix:** Added check that `sqrt(num_zones) <= grid_size`.
+
+#### 37. cross_val_score without groups crashed on single-class data
+
+**File:** `ml/train.py`
+
+The `else` branch (no groups) called `cross_val_score(..., scoring='roc_auc')`
+without checking if both classes exist. Single-class `y` causes sklearn to
+return NaN scores and emit warnings.
+
+**Fix:** Guard with `len(np.unique(y)) < 2` check; skip CV and return
+NaN scores. Also cap `cv` to `len(y)` to prevent folds > samples.
+
+---
+
 ## v2.4 — Dashboard Robustness, Zone Coverage & Consistency (2026-02-27)
 
 This release fixes dashboard crashes on non-MAS log files, ensures complete

@@ -13,12 +13,6 @@ HERO = [
 def ensure_dir(p: str):
     os.makedirs(p, exist_ok=True)
 
-def first_true_step(series_bool):
-    s = series_bool[series_bool == True]
-    if len(s) == 0:
-        return None
-    return int(s.index[0])
-
 def load_required(path: str) -> pd.DataFrame:
     if not os.path.exists(path):
         raise FileNotFoundError(f"Missing file: {path}")
