@@ -160,8 +160,8 @@ class DataGenerator:
 
         # Compute future flood labels
         for zone in env.zones:
-            for step in range(steps):
-                future_steps = all_states[step + 1: step + 1 + self.horizon_T]
+            for t in range(steps):
+                future_steps = all_states[t + 1: t + 1 + self.horizon_T]
                 will_flood = any(s[zone.zone_id]['flooded'] for s in future_steps)
                 future_flood[zone.zone_id].append(will_flood)
 

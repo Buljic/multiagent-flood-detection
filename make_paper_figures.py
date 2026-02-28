@@ -25,10 +25,10 @@ def load_required(path: str) -> pd.DataFrame:
     return pd.read_parquet(path)
 
 def plot_zone_timeline(df: pd.DataFrame, scenario_name: str, out_dir: str, th_up=0.6, th_down=0.4, zone_id=0):
-    # očekivane kolone: zone_id, step, risk, state, ground_truth:contentReference[oaicite:5]{index=5}
+    # očekivane kolone: zone_id, step, risk, state, ground_truth_flooded
     z = df[df["zone_id"] == zone_id].copy().sort_values("step")
     z["alarm"] = (z["state"] == "ALERT").astype(int)
-    gt_col = "ground_truth" if "ground_truth" in z.columns else None
+    gt_col = "ground_truth_flooded" if "ground_truth_flooded" in z.columns else None
 
     fig, ax = plt.subplots()
     ax.plot(z["step"], z["risk"], linewidth=2, label="risk")
@@ -44,7 +44,7 @@ def plot_zone_timeline(df: pd.DataFrame, scenario_name: str, out_dir: str, th_up
     ax2 = ax.twinx()
     ax2.plot(z["step"], z["alarm"], label="ALERT(state)", linewidth=1)
     if gt_col:
-        ax2.plot(z["step"], z[gt_col].astype(int), label="ground_truth", linewidth=1)
+        ax2.plot(z["step"], z[gt_col].astype(int), label="ground_truth_flooded", linewidth=1)
     ax2.set_ylabel("Alarm / Ground truth")
     ax2.set_yticks([0, 1])
 
@@ -61,7 +61,7 @@ def plot_zone_timeline(df: pd.DataFrame, scenario_name: str, out_dir: str, th_up
             f"- Linija 'risk': ML vjerovatnoća poplave\n"
             f"- TH_UP/TH_DOWN: guardrails pragovi (hysteresis)\n"
             f"- ALERT(state): kada sistem uđe u ALERT\n"
-            f"- ground_truth: stvarni flood event (ako postoji kolona)\n"
+            f"- ground_truth_flooded: stvarni flood event (ako postoji kolona)\n"
         )
 
 def plot_global_timeline(coord: pd.DataFrame, scenario_name: str, out_dir: str):
@@ -107,8 +107,8 @@ def save_summary_row(rows, scenario_name, df, coord):
             first_global_alarm = int(a.iloc[0]["step"])
     # first flood (any zone)
     first_flood = None
-    if "ground_truth" in df.columns:
-        gt = df[df["ground_truth"] == True]
+    if "ground_truth_flooded" in df.columns:
+        gt = df[df["ground_truth_flooded"] == True]
         if len(gt) > 0:
             first_flood = int(gt.sort_values("step").iloc[0]["step"])
 

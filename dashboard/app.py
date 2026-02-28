@@ -64,7 +64,10 @@ def render_sidebar():
     """Render sidebar with data source selection."""
     st.sidebar.header("📁 Data Selection")
     
-    log_files = list(LOGS_DIR.glob("*.parquet")) if LOGS_DIR.exists() else []
+    log_files = [
+        f for f in LOGS_DIR.glob("*.parquet")
+        if not f.name.endswith(('_coordinator.parquet', '_baseline.parquet'))
+    ] if LOGS_DIR.exists() else []
     exp_files = list(EXPERIMENTS_DIR.glob("*.json")) if EXPERIMENTS_DIR.exists() else []
     
     selected_log = None
@@ -99,7 +102,11 @@ def render_timeline(logs: pd.DataFrame):
     if logs.empty:
         st.warning("No data available for timeline visualization.")
         return
-    
+
+    if 'zone_id' not in logs.columns:
+        st.warning("Log file does not contain zone_id column (may be a coordinator or baseline log).")
+        return
+
     zones = sorted(logs['zone_id'].unique())
     selected_zone = st.selectbox("Select Zone", zones, key="timeline_zone")
     
@@ -113,16 +120,17 @@ def render_timeline(logs: pd.DataFrame):
         row_heights=[0.4, 0.3, 0.3]
     )
     
-    fig.add_trace(
-        go.Scatter(
-            x=zone_data['step'],
-            y=zone_data['risk'],
-            mode='lines',
-            name='Risk',
-            line=dict(color='#FF6B6B', width=2)
-        ),
-        row=1, col=1
-    )
+    if 'risk' in zone_data.columns:
+        fig.add_trace(
+            go.Scatter(
+                x=zone_data['step'],
+                y=zone_data['risk'],
+                mode='lines',
+                name='Risk',
+                line=dict(color='#FF6B6B', width=2)
+            ),
+            row=1, col=1
+        )
     
     if 'water_mean_5' in zone_data.columns:
         fig.add_trace(
@@ -254,7 +262,7 @@ def render_lead_time_distribution(logs: pd.DataFrame):
         prev_flood = False
         
         for _, row in zone_data.iterrows():
-            if row['state'] == 'ALERT' and prev_state != 'ALERT':
+            if row['state'] in ('ALERT', 'SUSPECTED') and prev_state not in ('ALERT', 'SUSPECTED'):
                 alert_starts.append(row['step'])
             if row['ground_truth_flooded'] and not prev_flood:
                 flood_starts.append(row['step'])
@@ -497,11 +505,9 @@ def main():
             st.info("👈 Select experiment results from the sidebar to view comparison.")
             st.markdown("""
             ### Running Experiments
-            
+
             ```bash
-            python -m eval.run_experiments --config configs/scenarios.yaml \\
-                --model outputs/models/risk_model.pkl \\
-                --out outputs/experiments/results.json
+            python -m eval.run_experiments --config configs/default.yaml --scenarios-config configs/scenarios.yaml --model outputs/models/risk_model.pkl --out outputs/experiments/results.json
             ```
             """)
     
@@ -535,13 +541,15 @@ def main():
             if not logs.empty:
                 st.subheader("Simulation Logs")
                 
-                zone_filter = st.multiselect(
-                    "Filter by Zone",
-                    options=sorted(logs['zone_id'].unique()),
-                    default=sorted(logs['zone_id'].unique())
-                )
-                
-                filtered = logs[logs['zone_id'].isin(zone_filter)]
+                if 'zone_id' in logs.columns:
+                    zone_filter = st.multiselect(
+                        "Filter by Zone",
+                        options=sorted(logs['zone_id'].unique()),
+                        default=sorted(logs['zone_id'].unique())
+                    )
+                    filtered = logs[logs['zone_id'].isin(zone_filter)]
+                else:
+                    filtered = logs
                 st.dataframe(filtered, use_container_width=True)
                 
                 csv = filtered.to_csv(index=False)

@@ -1,0 +1,15 @@
+Figure 1: Timeline - Normal Wet
+============================================================
+
+What it shows:
+- Panel 1: ML risk prediction over time with alert threshold
+- Panel 2: Alert states from MAS (blue) vs Baseline (orange)
+- Panel 3: Ground truth flood occurrence (red)
+
+How to read:
+- Look for alerts (Panel 2) appearing BEFORE floods (Panel 3) = good lead time
+- Compare MAS vs Baseline alert patterns: fewer toggles = more stable
+
+Interpretation:
+MAS+ML provides smoother, more stable alerts with better timing compared to
+baseline threshold heuristic. Guardrails prevent flapping while maintaining sensitivity.

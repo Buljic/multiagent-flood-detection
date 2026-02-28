@@ -1,12 +1,6 @@
-# Internal documentation (not for public repo)
-projectDescription.md
-CONCEPTS.md
-EVERYTHING_EXPLAINED.md
-IEEE_SECTIONS.md
-IEEE_PAPER.md
-notes/multiagent-system.md
-
+# ============================================================
 # Python
+# ============================================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -28,44 +22,85 @@ wheels/
 .installed.cfg
 *.egg
 
+# ============================================================
 # Virtual environments
+# ============================================================
 venv/
 ENV/
 env/
 .venv/
 
-# IDE
+# ============================================================
+# IDE / Editor
+# ============================================================
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
+# ============================================================
+# Agent tool local settings
+# ============================================================
+.claude/
+
+# ============================================================
 # Jupyter
+# ============================================================
 .ipynb_checkpoints/
 
-# Output files (can be regenerated)
-outputs/datasets/*.parquet
-outputs/models/*.pkl
-outputs/models/*.json
-outputs/logs/*.csv
-outputs/logs/*.parquet
-outputs/experiments/*.json
-
-# Keep directory structure
-!outputs/datasets/.gitkeep
-!outputs/models/.gitkeep
-!outputs/logs/.gitkeep
-!outputs/experiments/.gitkeep
-
+# ============================================================
 # OS files
+# ============================================================
 .DS_Store
 Thumbs.db
 
+# ============================================================
 # Testing
+# ============================================================
 .pytest_cache/
 .coverage
 htmlcov/
 
+# ============================================================
+# Generated outputs (regenerated via run_pipeline.py)
+# ============================================================
+outputs/datasets/*.parquet
+outputs/models/*.pkl
+outputs/models/*.json
+outputs/logs/*.parquet
+outputs/experiments/*.json
+outputs/figures/*.png
+outputs/figures/*.txt
+outputs/figures/*.csv
+outputs/figures/*.md
 
-CHANGELOG.md
+# Deprecated v1 outputs (kept for reference, not tracked)
+outputs/_deprecated_v1/
+
+# Keep directory structure via .gitkeep
+!outputs/datasets/.gitkeep
+!outputs/models/.gitkeep
+!outputs/logs/.gitkeep
+!outputs/experiments/.gitkeep
+!outputs/figures/.gitkeep
+
+# ============================================================
+# FINAL_RESULTS (regenerated from pipeline)
+# ============================================================
+FINAL_RESULTS/
+
+# ============================================================
+# Internal documentation (not for public repo)
+# ============================================================
+projectDescription.md
+CONCEPTS.md
+EVERYTHING_EXPLAINED.md
+IEEE_SECTIONS.md
+IEEE_PAPER.md
+notes/
+
+# ============================================================
+# Misc files that shouldn't be in repo
+# ============================================================
+New Text Document.txt

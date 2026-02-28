@@ -12,7 +12,7 @@ from typing import Dict, Tuple, Optional
 import joblib
 import logging
 
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split, cross_val_score, GroupKFold
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import (
@@ -47,19 +47,20 @@ class ModelTrainer:
     """
     
     def __init__(self, model_type: str = 'rf', calibrate: bool = True,
-                 random_state: int = 42):
+                 random_state: int = 42, config: dict = None):
         self.model_type = model_type
         self.calibrate = calibrate
         self.random_state = random_state
         self.model = None
         self.feature_importance = {}
+        self.feature_columns = get_feature_columns(config)
     
     def load_data(self, data_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Load and split data into train/test sets (episode-based to prevent leakage)."""
         df = pd.read_parquet(data_path)
         logger.info(f"Loaded {len(df)} samples from {data_path}")
         
-        missing = [c for c in FEATURE_COLUMNS if c not in df.columns]
+        missing = [c for c in self.feature_columns if c not in df.columns]
         if missing:
             raise ValueError(f"Missing feature columns: {missing}")
         
@@ -87,9 +88,9 @@ class ModelTrainer:
                 df, test_size=0.2, random_state=self.random_state, stratify=df[TARGET_COLUMN]
             )
         
-        X_train = train_df[FEATURE_COLUMNS]
+        X_train = train_df[self.feature_columns]
         y_train = train_df[TARGET_COLUMN]
-        X_test = test_df[FEATURE_COLUMNS]
+        X_test = test_df[self.feature_columns]
         y_test = test_df[TARGET_COLUMN]
         
         logger.info(f"Train: {len(X_train)}, Test: {len(X_test)}")
@@ -145,9 +146,9 @@ class ModelTrainer:
         elif hasattr(self.model, 'feature_importances_'):
             importances = self.model.feature_importances_
         else:
-            importances = np.zeros(len(FEATURE_COLUMNS))
-        
-        self.feature_importance = dict(zip(FEATURE_COLUMNS, importances))
+            importances = np.zeros(len(self.feature_columns))
+
+        self.feature_importance = dict(zip(self.feature_columns, importances))
         
         logger.info("Training complete.")
     
@@ -167,11 +168,17 @@ class ModelTrainer:
             # Brier score measures calibration quality (lower is better)
             brier = brier_score_loss(y_test, y_prob)
         
+        if len(np.unique(y_test)) < 2:
+            logger.warning("Test set has only one class — AUC-ROC undefined, returning NaN")
+            auc_roc = float('nan')
+        else:
+            auc_roc = float(roc_auc_score(y_test, y_prob))
+
         metrics = {
-            'auc_roc': float(roc_auc_score(y_test, y_prob)),
-            'f1': float(f1_score(y_test, y_pred)),
-            'precision': float(precision_score(y_test, y_pred)),
-            'recall': float(recall_score(y_test, y_pred)),
+            'auc_roc': auc_roc,
+            'f1': float(f1_score(y_test, y_pred, zero_division=0)),
+            'precision': float(precision_score(y_test, y_pred, zero_division=0)),
+            'recall': float(recall_score(y_test, y_pred, zero_division=0)),
             'accuracy': float((y_pred == y_test).mean()),
             'brier_score': float(brier),  # Calibration quality metric
             'confusion_matrix': confusion_matrix(y_test, y_pred).tolist(),
@@ -213,21 +220,42 @@ class ModelTrainer:
                 json.dump(metrics, f, indent=2)
             logger.info(f"Saved report to {report_path}")
     
-    def cross_validate(self, X: pd.DataFrame, y: pd.Series, cv: int = 5) -> Dict:
-        """Perform cross-validation."""
+    def cross_validate(self, X: pd.DataFrame, y: pd.Series,
+                       groups: Optional[pd.Series] = None, cv: int = 5) -> Dict:
+        """Perform cross-validation, grouped by episode if groups provided."""
         base_model = self.create_model()
-        
-        scores = cross_val_score(base_model, X, y, cv=cv, scoring='roc_auc')
-        
+
+        if groups is not None:
+            n_groups = groups.nunique()
+            if n_groups < 2:
+                logger.warning(
+                    f"Only {n_groups} group(s) — skipping CV "
+                    f"(need >=2 groups for meaningful cross-validation)"
+                )
+                return {
+                    'cv_auc_mean': float('nan'),
+                    'cv_auc_std': float('nan'),
+                    'cv_scores': []
+                }
+            else:
+                actual_cv = min(cv, n_groups)
+                gkf = GroupKFold(n_splits=actual_cv)
+                scores = cross_val_score(
+                    base_model, X, y, cv=gkf, groups=groups, scoring='roc_auc'
+                )
+                logger.info(f"GroupKFold CV ({actual_cv} folds, {n_groups} episodes)")
+        else:
+            scores = cross_val_score(base_model, X, y, cv=cv, scoring='roc_auc')
+
         result = {
             'cv_auc_mean': float(scores.mean()),
             'cv_auc_std': float(scores.std()),
             'cv_scores': scores.tolist()
         }
-        
+
         logger.info(f"Cross-validation AUC: {result['cv_auc_mean']:.4f} "
                    f"(+/- {result['cv_auc_std']:.4f})")
-        
+
         return result
 
 
@@ -242,29 +270,42 @@ def main():
                         help='Output path for trained model')
     parser.add_argument('--report', type=str, default='outputs/models/train_report.json',
                         help='Output path for training report')
+    parser.add_argument('--config', type=str, default='configs/default.yaml',
+                        help='Path to configuration file (for feature list)')
     parser.add_argument('--no-calibrate', action='store_true',
                         help='Disable probability calibration')
     parser.add_argument('--seed', type=int, default=42,
                         help='Random seed')
-    
+
     args = parser.parse_args()
-    
+
+    # Load config for feature list (ensures train/infer use same features)
+    import yaml
+    ml_config = None
+    if Path(args.config).exists():
+        with open(args.config, 'r') as f:
+            ml_config = yaml.safe_load(f)
+
     trainer = ModelTrainer(
         model_type=args.model,
         calibrate=not args.no_calibrate,
-        random_state=args.seed
+        random_state=args.seed,
+        config=ml_config
     )
     
     (X_train, y_train), (X_test, y_test) = trainer.load_data(args.data)
-    
+
     trainer.train(X_train, y_train)
-    
+
     metrics = trainer.evaluate(X_test, y_test)
-    
-    cv_results = trainer.cross_validate(
-        pd.concat([X_train, X_test]),
-        pd.concat([y_train, y_test])
-    )
+
+    # Load episode groups for grouped CV (prevents data leakage in CV too)
+    full_df = pd.read_parquet(args.data)
+    X_all = pd.concat([X_train, X_test])
+    y_all = pd.concat([y_train, y_test])
+    groups = full_df.loc[X_all.index, 'episode_id'] if 'episode_id' in full_df.columns else None
+
+    cv_results = trainer.cross_validate(X_all, y_all, groups=groups)
     metrics.update(cv_results)
     
     trainer.save(args.out, args.report, metrics)

@@ -1,0 +1,14 @@
+Figure 4: Robustness to Sensor Dropout
+============================================================
+
+What it shows:
+Performance degradation as sensor dropout rate increases (10%, 30%, 50%).
+Solid lines = F1 score, Dashed lines = Recall.
+
+How to read:
+- Flatter curve = more robust to sensor failures
+- MAS (blue) should degrade slower than baseline (orange)
+
+Interpretation:
+MAS+ML with consensus + health-aware guardrails maintains performance
+better than baseline under sensor failures. Multi-agent redundancy pays off.

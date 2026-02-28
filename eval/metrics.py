@@ -65,17 +65,7 @@ class MetricsCalculator:
         y_true = np.asarray(y_true).astype(int)
         y_pred = np.asarray(y_pred).astype(int)
         
-        if len(np.unique(y_true)) < 2:
-            return DetectionMetrics(
-                precision=0.0 if y_true.sum() == 0 else 1.0,
-                recall=1.0 if y_pred.sum() > 0 and y_true.sum() > 0 else 0.0,
-                f1=0.0,
-                false_positive_rate=0.0,
-                true_positive_rate=0.0,
-                accuracy=float((y_true == y_pred).mean()),
-                confusion_matrix=np.array([[0, 0], [0, 0]])
-            )
-        
+        # Use labels=[0,1] to always get a 2x2 matrix, even with single-class data
         cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
         tn, fp, fn, tp = cm.ravel()
         
@@ -84,7 +74,8 @@ class MetricsCalculator:
         f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
         fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
         tpr = recall
-        accuracy = (tp + tn) / (tp + tn + fp + fn)
+        total = tp + tn + fp + fn
+        accuracy = (tp + tn) / total if total > 0 else 0.0
         
         return DetectionMetrics(
             precision=float(precision),
@@ -202,45 +193,79 @@ class MetricsCalculator:
             }
         
         if 'state' in logs.columns:
-            state_history = logs['state'].tolist()
-            num_zones = logs['zone_id'].nunique() if 'zone_id' in logs.columns else 1
-            
-            stability = self.compute_stability_metrics(state_history, num_zones)
-            results['stability'] = {
-                'total_state_changes': stability.total_state_changes,
-                'avg_state_changes_per_zone': stability.avg_state_changes_per_zone,
-                'flapping_rate': stability.flapping_rate,
-                'time_in_alert': stability.time_in_alert
-            }
+            # Compute stability PER ZONE then aggregate — avoids counting
+            # zone-boundary transitions as spurious state changes.
+            if 'zone_id' in logs.columns:
+                num_zones = logs['zone_id'].nunique()
+                total_changes = 0
+                weighted_flapping = 0.0
+                weighted_alert = 0.0
+                total_entries = 0
+
+                for zone_id in sorted(logs['zone_id'].unique()):
+                    zone_logs = logs[logs['zone_id'] == zone_id].sort_values('step')
+                    zone_history = zone_logs['state'].tolist()
+                    zm = self.compute_stability_metrics(zone_history, num_zones=1)
+                    total_changes += zm.total_state_changes
+                    weighted_flapping += zm.flapping_rate * len(zone_history)
+                    weighted_alert += zm.time_in_alert * len(zone_history)
+                    total_entries += len(zone_history)
+
+                results['stability'] = {
+                    'total_state_changes': total_changes,
+                    'avg_state_changes_per_zone': total_changes / max(1, num_zones),
+                    'flapping_rate': weighted_flapping / max(1, total_entries),
+                    'time_in_alert': weighted_alert / max(1, total_entries),
+                }
+            else:
+                state_history = logs['state'].tolist()
+                stability = self.compute_stability_metrics(state_history)
+                results['stability'] = {
+                    'total_state_changes': stability.total_state_changes,
+                    'avg_state_changes_per_zone': stability.avg_state_changes_per_zone,
+                    'flapping_rate': stability.flapping_rate,
+                    'time_in_alert': stability.time_in_alert
+                }
         
         if 'state' in logs.columns and 'ground_truth_flooded' in logs.columns:
-            alert_starts = []
-            flood_starts = []
-            
-            for zone_id in logs['zone_id'].unique():
+            # Compute lead time PER ZONE then aggregate — avoids matching
+            # alerts in one zone with floods in a different zone.
+            all_lead_times = []
+
+            for zone_id in sorted(logs['zone_id'].unique()):
                 zone_logs = logs[logs['zone_id'] == zone_id].sort_values('step')
-                
+
+                zone_alerts = []
                 prev_state = 'NORMAL'
                 for _, row in zone_logs.iterrows():
-                    if row['state'] == 'ALERT' and prev_state != 'ALERT':
-                        alert_starts.append(row['step'])
+                    if row['state'] in ('ALERT', 'SUSPECTED') and prev_state not in ('ALERT', 'SUSPECTED'):
+                        zone_alerts.append(row['step'])
                     prev_state = row['state']
-                
+
+                zone_floods = []
                 prev_flood = False
                 for _, row in zone_logs.iterrows():
                     if row['ground_truth_flooded'] and not prev_flood:
-                        flood_starts.append(row['step'])
+                        zone_floods.append(row['step'])
                     prev_flood = row['ground_truth_flooded']
-            
-            lead_time = self.compute_lead_time(alert_starts, flood_starts)
-            results['lead_time'] = {
-                'mean': lead_time.mean_lead_time,
-                'median': lead_time.median_lead_time,
-                'std': lead_time.std_lead_time,
-                'min': lead_time.min_lead_time,
-                'max': lead_time.max_lead_time,
-                'count': len(lead_time.lead_times)
-            }
+
+                zone_lt = self.compute_lead_time(zone_alerts, zone_floods)
+                all_lead_times.extend(zone_lt.lead_times)
+
+            if all_lead_times:
+                results['lead_time'] = {
+                    'mean': float(np.mean(all_lead_times)),
+                    'median': float(np.median(all_lead_times)),
+                    'std': float(np.std(all_lead_times)),
+                    'min': float(np.min(all_lead_times)),
+                    'max': float(np.max(all_lead_times)),
+                    'count': len(all_lead_times)
+                }
+            else:
+                results['lead_time'] = {
+                    'mean': 0.0, 'median': 0.0, 'std': 0.0,
+                    'min': 0.0, 'max': 0.0, 'count': 0
+                }
         
         return results
     

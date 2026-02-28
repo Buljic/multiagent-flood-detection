@@ -258,28 +258,65 @@ def main():
     if args.model and Path(args.model).exists():
         ml_model = joblib.load(args.model)
         logger.info(f"Loaded ML model from {args.model}")
-    
+
     model = FloodModel(config, ml_model=ml_model, seed=config.get('seed', 42))
     if soil_init is not None:
         model.reset(soil_init)
     model.generate_random_rainfall(rainfall_type)
-    
+
     steps = args.steps or config['simulation']['steps_per_episode']
     real_time = steps_to_real_time(steps, config)
     logger.info(f"Running simulation for {steps} steps (~{real_time} real-world) with scenario '{args.scenario}'")
-    
-    logs = model.run(steps)
-    
+
+    # Run MAS + baseline in parallel, recording per-step ground truth
+    from baseline.threshold import ZonedThresholdBaseline
+    num_zones = config['simulation']['num_zones']
+    baseline = ZonedThresholdBaseline(num_zones=num_zones, config=config)
+    per_step_gt = {}
+
+    for step in range(steps):
+        model.step()
+
+        for zone_id in range(num_zones):
+            per_step_gt[(step, zone_id)] = model.environment.is_flooded(zone_id)
+
+        zone_readings = {}
+        for zone_id, edge in model.edges.items():
+            zone_readings[zone_id] = {
+                'water': edge.current_features.get('water_mean_5', 0),
+                'rain': edge.current_features.get('rain_sum_20', 0) / 20
+            }
+        baseline.update(zone_readings, step)
+
+    logs = model.get_logs()
+
     output_path = Path(args.log)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     logs.to_parquet(output_path, index=False)
     logger.info(f"Saved logs to {output_path}")
-    
+
     coord_logs = model.get_coordinator_logs()
     coord_path = output_path.parent / f"{output_path.stem}_coordinator.parquet"
     coord_logs.to_parquet(coord_path, index=False)
     logger.info(f"Saved coordinator logs to {coord_path}")
-    
+
+    # Save baseline logs with per-step ground truth
+    baseline_records = []
+    for zone_id in range(num_zones):
+        zone_history = baseline.get_zone_history(zone_id)
+        for _, row in zone_history.iterrows():
+            baseline_records.append({
+                'step': row['step'],
+                'zone_id': zone_id,
+                'state': row['state'],
+                'ground_truth_flooded': per_step_gt.get(
+                    (row['step'], zone_id), False)
+            })
+    baseline_logs = pd.DataFrame(baseline_records)
+    baseline_path = output_path.parent / f"{output_path.stem}_baseline.parquet"
+    baseline_logs.to_parquet(baseline_path, index=False)
+    logger.info(f"Saved baseline logs to {baseline_path}")
+
     global_status = model.coordinator.get_global_status()
     logger.info(f"Final status: {global_status}")
 

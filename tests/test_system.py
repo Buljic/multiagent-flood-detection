@@ -9,6 +9,7 @@ _project_root = str(Path(__file__).parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
+import pytest
 import numpy as np
 import pandas as pd
 import yaml
@@ -540,15 +541,35 @@ class TestMetrics:
         assert metrics.false_positive_rate == 0.0
 
     def test_detection_metrics_single_class(self):
-        """Should handle single-class inputs without crashing."""
+        """Should handle single-class inputs without crashing and produce
+        consistent metrics (no impossible precision=1/recall=1/f1=0 combos)."""
         from eval.metrics import MetricsCalculator
 
         calc = MetricsCalculator()
+
+        # All negative, predicted all negative => perfect TN, no TP/FP/FN
         y_true = np.array([0, 0, 0, 0])
         y_pred = np.array([0, 0, 0, 0])
-
         metrics = calc.compute_detection_metrics(y_true, y_pred)
         assert metrics.accuracy == 1.0
+        assert metrics.precision == 0.0  # no positives predicted
+        assert metrics.recall == 0.0     # no positives in truth
+        assert metrics.f1 == 0.0
+        assert metrics.confusion_matrix[0, 0] == 4  # 4 TN
+
+        # All negative, but predicted some positive => FP only
+        y_pred_fp = np.array([1, 0, 0, 0])
+        metrics_fp = calc.compute_detection_metrics(y_true, y_pred_fp)
+        assert metrics_fp.precision == 0.0  # TP=0, FP=1
+        assert metrics_fp.recall == 0.0     # no positives in truth
+        assert metrics_fp.false_positive_rate > 0
+
+        # All positive, predicted all positive => perfect TP
+        y_all_pos = np.array([1, 1, 1, 1])
+        metrics_pos = calc.compute_detection_metrics(y_all_pos, y_all_pos)
+        assert metrics_pos.precision == 1.0
+        assert metrics_pos.recall == 1.0
+        assert metrics_pos.f1 == 1.0
 
     def test_stability_metrics(self):
         from eval.metrics import MetricsCalculator
@@ -833,6 +854,349 @@ class TestIntegration:
             assert edge is not None, \
                 f"MitigationAgent for zone {zone_id} could not find its edge"
             assert edge.zone_id == zone_id
+
+
+# ============================================================================
+# Experiment Runner Tests
+# ============================================================================
+
+class TestExperimentRunner:
+    """Tests for experiment runner correctness."""
+
+    def test_baseline_ground_truth_varies_per_step(self):
+        """Baseline ground truth must be per-step, not end-of-sim constant."""
+        from sim.model import FloodModel
+        from baseline.threshold import ZonedThresholdBaseline
+
+        config = load_config()
+        model = FloodModel(config, seed=42)
+        model.reset(soil_saturation_init=0.7)
+        model.environment.add_rainfall_event(intensity=0.8, duration=60, start_step=10)
+
+        num_zones = config['simulation']['num_zones']
+        baseline = ZonedThresholdBaseline(num_zones=num_zones, config=config)
+        per_step_gt = {}
+
+        for step in range(200):
+            model.step()
+            for zone_id in range(num_zones):
+                per_step_gt[(step, zone_id)] = model.environment.is_flooded(zone_id)
+
+            zone_readings = {}
+            for zone_id, edge in model.edges.items():
+                zone_readings[zone_id] = {
+                    'water': edge.current_features.get('water_mean_5', 0),
+                    'rain': edge.current_features.get('rain_sum_20', 0) / 20
+                }
+            baseline.update(zone_readings, step)
+
+        # At least one zone should transition from not-flooded to flooded
+        has_variation = False
+        for zone_id in range(num_zones):
+            gt_values = [per_step_gt[(s, zone_id)] for s in range(200)]
+            if len(set(gt_values)) > 1:
+                has_variation = True
+                break
+
+        assert has_variation, \
+            "Baseline ground truth is constant — per-step recording is broken"
+
+    def test_metrics_single_class_consistency(self):
+        """Single-class metrics must be internally consistent:
+        - If no positives exist in truth and none predicted: P=0, R=0, F1=0
+        - confusion_matrix must reflect actual counts, not zeros."""
+        from eval.metrics import MetricsCalculator
+
+        calc = MetricsCalculator()
+        y_true = np.array([0, 0, 0, 0, 0])
+        y_pred = np.array([0, 0, 0, 0, 0])
+
+        m = calc.compute_detection_metrics(y_true, y_pred)
+
+        # No positives anywhere => P, R, F1 all zero
+        assert m.precision == 0.0
+        assert m.recall == 0.0
+        assert m.f1 == 0.0
+        # Confusion matrix must have actual counts
+        assert m.confusion_matrix[0, 0] == 5  # 5 true negatives
+        assert m.confusion_matrix.sum() == 5
+
+    def test_metrics_no_impossible_combinations(self):
+        """precision=1, recall=1 with f1=0 should never happen."""
+        from eval.metrics import MetricsCalculator
+
+        calc = MetricsCalculator()
+
+        # Test various single-class combinations
+        for y_true, y_pred in [
+            (np.array([0, 0, 0]), np.array([0, 0, 0])),
+            (np.array([1, 1, 1]), np.array([1, 1, 1])),
+            (np.array([0, 0, 0]), np.array([1, 0, 0])),
+            (np.array([1, 1, 1]), np.array([0, 1, 1])),
+        ]:
+            m = calc.compute_detection_metrics(y_true, y_pred)
+            # If F1 is 0, at least one of P or R must be 0
+            if m.f1 == 0.0:
+                assert m.precision == 0.0 or m.recall == 0.0, \
+                    f"F1=0 but P={m.precision}, R={m.recall} — impossible"
+
+    def test_feature_columns_from_config(self):
+        """ModelTrainer should use feature list from config, not hardcoded."""
+        from ml.train import ModelTrainer, get_feature_columns
+
+        config = load_config()
+        trainer = ModelTrainer(config=config)
+
+        assert trainer.feature_columns == config['ml']['features']
+
+        # Without config, should fall back to defaults
+        trainer_default = ModelTrainer()
+        assert len(trainer_default.feature_columns) == 8
+
+    def test_stability_matches_state_machine(self):
+        """Stability total_state_changes from metrics must match the actual
+        state machine counts (no spurious zone-boundary transitions)."""
+        from sim.model import FloodModel
+        from eval.metrics import MetricsCalculator
+
+        config = load_config()
+        model = FloodModel(config, seed=42)
+        model.reset(soil_saturation_init=0.7)
+        model.environment.add_rainfall_event(intensity=0.8, duration=60, start_step=10)
+        logs = model.run(200)
+
+        # Ground-truth state changes from actual state machines
+        sm_total = sum(e.state_machine.state_changes for e in model.edges.values())
+
+        calc = MetricsCalculator()
+        metrics = calc.compute_from_logs(logs)
+        metric_total = metrics['stability']['total_state_changes']
+
+        assert metric_total == sm_total, (
+            f"Metric stability ({metric_total}) != state machine ({sm_total}). "
+            f"Likely counting zone-boundary transitions as state changes."
+        )
+
+    def test_groupkfold_single_episode_no_crash(self):
+        """GroupKFold with only 1 episode must not crash."""
+        from ml.train import ModelTrainer
+
+        config = load_config()
+        trainer = ModelTrainer(config=config)
+
+        # Tiny dataset: 1 episode
+        X = pd.DataFrame({
+            'water_mean_5': [0.1, 0.2, 0.3],
+            'water_slope_5': [0.0, 0.01, 0.02],
+            'water_max_10': [0.1, 0.2, 0.3],
+            'rain_sum_20': [0.5, 1.0, 1.5],
+            'rain_mean_10': [0.05, 0.1, 0.15],
+            'soil_mean_10': [0.3, 0.3, 0.3],
+            'consensus': [0.0, 0.5, 1.0],
+            'health': [1.0, 1.0, 1.0],
+        })
+        y = pd.Series([0, 0, 1])
+        groups = pd.Series([0, 0, 0])  # single episode
+
+        # Should not raise — skips CV gracefully
+        result = trainer.cross_validate(X, y, groups=groups, cv=5)
+        assert 'cv_auc_mean' in result
+        assert result['cv_scores'] == []  # No CV possible with 1 group
+
+    def test_no_runtime_warnings_on_import(self):
+        """Package __init__.py should not eagerly import -m runnable modules."""
+        import importlib
+        import warnings
+
+        for pkg in ['eval', 'sim', 'ml']:
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                importlib.reload(importlib.import_module(pkg))
+                runtime_warnings = [x for x in w if issubclass(x.category, RuntimeWarning)]
+                assert len(runtime_warnings) == 0, (
+                    f"Package '{pkg}' produced RuntimeWarning on import: "
+                    f"{[str(x.message) for x in runtime_warnings]}"
+                )
+
+
+    def test_lead_time_per_zone_not_cross_zone(self):
+        """Lead time must NOT match alerts in one zone with floods in another."""
+        from eval.metrics import MetricsCalculator
+
+        calc = MetricsCalculator()
+        # Zone 0: alert at step 10, no flood ever
+        # Zone 1: no alert, flood at step 20
+        # Cross-zone: old code would compute lead_time = 20-10 = 10 (wrong)
+        # Per-zone:   zone 0 has no flood → no lead time
+        #             zone 1 has no alert → no lead time
+        #             Expected count = 0
+        logs = pd.DataFrame([
+            *[{'step': s, 'zone_id': 0,
+               'state': 'ALERT' if 10 <= s <= 30 else 'NORMAL',
+               'ground_truth_flooded': False} for s in range(50)],
+            *[{'step': s, 'zone_id': 1,
+               'state': 'NORMAL',
+               'ground_truth_flooded': s >= 20} for s in range(50)],
+        ])
+
+        metrics = calc.compute_from_logs(logs)
+        assert metrics['lead_time']['count'] == 0, (
+            "Cross-zone alert/flood should NOT produce a lead time"
+        )
+
+    def test_num_zones_non_square_raises(self):
+        """Non-perfect-square num_zones must raise ValueError."""
+        from sim.environment import FloodEnvironment
+
+        config = load_config()
+        config = copy.deepcopy(config)
+        config['simulation']['num_zones'] = 6  # not a perfect square
+
+        with pytest.raises(ValueError, match="not a perfect square"):
+            FloodEnvironment(config, seed=42)
+
+    def test_evaluate_single_class_test_set(self):
+        """evaluate() must not crash when test set has only one class."""
+        from ml.train import ModelTrainer
+
+        config = load_config()
+        trainer = ModelTrainer(config=config)
+
+        # Need >=5 samples per class for 5-fold calibration CV
+        rng = np.random.default_rng(42)
+        n = 20
+        X_train = pd.DataFrame({
+            'water_mean_5': rng.uniform(0, 1, n),
+            'water_slope_5': rng.uniform(0, 0.1, n),
+            'water_max_10': rng.uniform(0, 1, n),
+            'rain_sum_20': rng.uniform(0, 5, n),
+            'rain_mean_10': rng.uniform(0, 0.5, n),
+            'soil_mean_10': rng.uniform(0, 1, n),
+            'consensus': rng.uniform(0, 1, n),
+            'health': rng.uniform(0.5, 1, n),
+        })
+        y_train = pd.Series([0]*10 + [1]*10)
+        trainer.train(X_train, y_train)
+
+        # Test set with only one class (all negative)
+        X_test = pd.DataFrame({
+            'water_mean_5': [0.1, 0.15],
+            'water_slope_5': [0.0, 0.0],
+            'water_max_10': [0.1, 0.15],
+            'rain_sum_20': [0.5, 0.6],
+            'rain_mean_10': [0.05, 0.06],
+            'soil_mean_10': [0.3, 0.3],
+            'consensus': [0.0, 0.0],
+            'health': [1.0, 1.0],
+        })
+        y_test = pd.Series([0, 0])
+
+        result = trainer.evaluate(X_test, y_test)
+        assert 'auc_roc' in result
+        assert np.isnan(result['auc_roc']), "AUC-ROC should be NaN for single-class test set"
+
+    def test_experiment_seed_from_config(self):
+        """Experiment seed should come from config, not be hardcoded."""
+        from eval.run_experiments import ExperimentRunner
+
+        config = load_config()
+        config = copy.deepcopy(config)
+        config['seed'] = 999
+
+        runner = ExperimentRunner(config)
+        metadata = runner._generate_run_metadata([], repeats=1)
+        assert metadata['seed'] == 999, (
+            f"Metadata seed should match config seed 999, got {metadata['seed']}"
+        )
+
+
+    def test_zone_allocation_covers_entire_grid(self):
+        """Every grid cell must belong to exactly one zone, even when
+        grid_size is not perfectly divisible by sqrt(num_zones)."""
+        from sim.environment import FloodEnvironment
+
+        config = load_config()
+        config = copy.deepcopy(config)
+        config['simulation']['grid_size'] = 20
+        config['simulation']['num_zones'] = 9  # sqrt=3, 20//3=6, remainder=2
+
+        env = FloodEnvironment(config, seed=42)
+        env.reset(soil_saturation_init=0.3)
+
+        grid_size = config['simulation']['grid_size']
+        all_cells = set()
+        for zone in env.zones:
+            all_cells.update(zone.cells)
+
+        expected = {(r, c) for r in range(grid_size) for c in range(grid_size)}
+        assert all_cells == expected, (
+            f"Unallocated cells: {expected - all_cells}"
+        )
+
+    def test_lead_time_counts_suspected_as_alert(self):
+        """Lead time must count SUSPECTED as alert start (matching detection)."""
+        from eval.metrics import MetricsCalculator
+
+        calc = MetricsCalculator()
+        # Zone 0: SUSPECTED at step 10 (no ALERT), flood at step 20
+        logs = pd.DataFrame([
+            {'step': s, 'zone_id': 0,
+             'state': 'SUSPECTED' if 10 <= s <= 15 else 'NORMAL',
+             'ground_truth_flooded': s >= 20}
+            for s in range(50)
+        ])
+
+        metrics = calc.compute_from_logs(logs)
+        assert metrics['lead_time']['count'] > 0, (
+            "SUSPECTED should count as alert start for lead time"
+        )
+
+    def test_evaluate_no_undefined_metric_warning(self):
+        """evaluate() with single-class test set should not emit
+        UndefinedMetricWarning (zero_division=0 suppresses it)."""
+        import warnings
+        from ml.train import ModelTrainer
+
+        config = load_config()
+        trainer = ModelTrainer(config=config)
+
+        rng = np.random.default_rng(42)
+        n = 20
+        X_train = pd.DataFrame({
+            'water_mean_5': rng.uniform(0, 1, n),
+            'water_slope_5': rng.uniform(0, 0.1, n),
+            'water_max_10': rng.uniform(0, 1, n),
+            'rain_sum_20': rng.uniform(0, 5, n),
+            'rain_mean_10': rng.uniform(0, 0.5, n),
+            'soil_mean_10': rng.uniform(0, 1, n),
+            'consensus': rng.uniform(0, 1, n),
+            'health': rng.uniform(0.5, 1, n),
+        })
+        y_train = pd.Series([0]*10 + [1]*10)
+        trainer.train(X_train, y_train)
+
+        X_test = pd.DataFrame({
+            'water_mean_5': [0.1, 0.15],
+            'water_slope_5': [0.0, 0.0],
+            'water_max_10': [0.1, 0.15],
+            'rain_sum_20': [0.5, 0.6],
+            'rain_mean_10': [0.05, 0.06],
+            'soil_mean_10': [0.3, 0.3],
+            'consensus': [0.0, 0.0],
+            'health': [1.0, 1.0],
+        })
+        y_test = pd.Series([0, 0])
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            trainer.evaluate(X_test, y_test)
+            undefined_warnings = [
+                x for x in w
+                if 'UndefinedMetric' in str(x.category.__name__)
+            ]
+            assert len(undefined_warnings) == 0, (
+                f"Got UndefinedMetricWarning: {[str(x.message) for x in undefined_warnings]}"
+            )
 
 
 if __name__ == '__main__':

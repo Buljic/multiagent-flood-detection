@@ -383,15 +383,17 @@ def main():
     # Fig1: Timeline for each hero scenario (if logs available)
     logs_dir = Path(args.logs_dir)
     for scenario in hero_scenarios:
-        mas_log = logs_dir / f'{scenario}_mas.parquet'
-        baseline_log = logs_dir / f'{scenario}_baseline.parquet'
-        
+        mas_log = logs_dir / f'hero_{scenario}.parquet'
+        baseline_log = logs_dir / f'hero_{scenario}_baseline.parquet'
+
         if mas_log.exists() and baseline_log.exists():
             mas_logs = load_logs(str(mas_log))
             baseline_logs = load_logs(str(baseline_log))
             create_timeline_figure(mas_logs, baseline_logs, scenario, output_dir)
         else:
-            logger.warning(f"Logs not found for {scenario}, skipping timeline figure")
+            logger.warning(f"Logs not found for {scenario} "
+                          f"(looked for {mas_log.name} and {baseline_log.name}), "
+                          f"skipping timeline figure")
     
     # Fig2-5: From aggregated results
     create_confusion_matrix_figure(results, hero_scenarios, output_dir)

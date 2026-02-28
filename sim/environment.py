@@ -86,19 +86,29 @@ class FloodEnvironment:
     
     def _init_zones(self):
         """Divide grid into monitoring zones."""
+        sqrt_nz = int(np.sqrt(self.num_zones))
+        if sqrt_nz * sqrt_nz != self.num_zones:
+            raise ValueError(
+                f"num_zones={self.num_zones} is not a perfect square. "
+                f"Zone grid requires a perfect square (e.g. 4, 9, 16)."
+            )
         self.zones: List[Zone] = []
-        zone_rows = self.grid_size // int(np.sqrt(self.num_zones))
-        zone_cols = self.grid_size // int(np.sqrt(self.num_zones))
+        zone_rows = self.grid_size // sqrt_nz
+        zone_cols = self.grid_size // sqrt_nz
         
         zone_id = 0
-        zones_per_row = int(np.sqrt(self.num_zones))
+        zones_per_row = sqrt_nz
         
         for zi in range(zones_per_row):
             for zj in range(zones_per_row):
+                row_start = zi * zone_rows
+                row_end = (zi + 1) * zone_rows if zi < zones_per_row - 1 else self.grid_size
+                col_start = zj * zone_cols
+                col_end = (zj + 1) * zone_cols if zj < zones_per_row - 1 else self.grid_size
                 cells = []
                 is_river = False
-                for i in range(zi * zone_rows, min((zi + 1) * zone_rows, self.grid_size)):
-                    for j in range(zj * zone_cols, min((zj + 1) * zone_cols, self.grid_size)):
+                for i in range(row_start, row_end):
+                    for j in range(col_start, col_end):
                         cells.append((i, j))
                         if self.river_mask[i, j]:
                             is_river = True

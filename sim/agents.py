@@ -7,6 +7,7 @@ Multi-Agent System agents for flood detection:
 """
 
 import numpy as np
+import pandas as pd
 from mesa import Agent
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
@@ -158,9 +159,10 @@ class EdgeAggregatorAgent(Agent):
                 'rain_sum_20', 'rain_mean_10', 'soil_mean_10',
                 'consensus', 'health'
             ])
-            feature_vector = np.array([[
-                self.current_features[f] for f in feature_names
-            ]])
+            feature_vector = pd.DataFrame(
+                [[self.current_features[f] for f in feature_names]],
+                columns=feature_names
+            )
             self.current_risk = self.ml_model.predict_proba(feature_vector)[0, 1]
         else:
             self.current_risk = self._heuristic_risk()
@@ -254,8 +256,8 @@ class CoordinatorAgent(Agent):
             'global_alarm': self.global_alarm,
             'num_zones_in_alert': len(self.zones_in_alert),
             'zones_in_alert': list(self.zones_in_alert),
-            'zone_risks': {s['zone_id']: s['risk'] for s in statuses},
-            'zone_states': {s['zone_id']: s['state'].value for s in statuses}
+            'zone_risks': {str(s['zone_id']): s['risk'] for s in statuses},
+            'zone_states': {str(s['zone_id']): s['state'].value for s in statuses}
         })
     
     def get_global_status(self) -> Dict[str, Any]:

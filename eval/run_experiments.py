@@ -75,10 +75,19 @@ class ExperimentRunner:
             num_zones=scenario_config['simulation']['num_zones'],
             config=scenario_config
         )
-        
+
+        # Record per-step ground truth during simulation (not after!)
+        per_step_ground_truth = {}  # (step, zone_id) -> bool
+        num_zones = scenario_config['simulation']['num_zones']
+
         for step in range(steps):
             mas_model.step()
-            
+
+            # Capture ground truth at this step for each zone
+            for zone_id in range(num_zones):
+                per_step_ground_truth[(step, zone_id)] = \
+                    mas_model.environment.is_flooded(zone_id)
+
             zone_readings = {}
             for zone_id, edge in mas_model.edges.items():
                 zone_readings[zone_id] = {
@@ -86,19 +95,19 @@ class ExperimentRunner:
                     'rain': edge.current_features.get('rain_sum_20', 0) / 20
                 }
             baseline.update(zone_readings, step)
-        
+
         mas_logs = mas_model.get_logs()
-        
+
         baseline_records = []
-        for zone_id in range(scenario_config['simulation']['num_zones']):
+        for zone_id in range(num_zones):
             zone_history = baseline.get_zone_history(zone_id)
             for _, row in zone_history.iterrows():
-                flood_status = mas_model.environment.is_flooded(zone_id)
                 baseline_records.append({
                     'step': row['step'],
                     'zone_id': zone_id,
                     'state': row['state'],
-                    'ground_truth_flooded': flood_status
+                    'ground_truth_flooded': per_step_ground_truth.get(
+                        (row['step'], zone_id), False)
                 })
         baseline_logs = pd.DataFrame(baseline_records)
         
@@ -133,8 +142,9 @@ class ExperimentRunner:
         for scenario in tqdm(scenarios, desc="Running scenarios"):
             scenario_results = []
             
+            base_seed = self.config.get('seed', 42)
             for rep in range(repeats):
-                seed = 42 + rep * 1000
+                seed = base_seed + rep * 1000
                 result = self.run_scenario(scenario, steps, seed)
                 result['repeat'] = rep
                 scenario_results.append(result)
@@ -249,8 +259,6 @@ def main():
                         help='Path to scenarios configuration')
     parser.add_argument('--model', type=str, default=None,
                         help='Path to trained ML model')
-    parser.add_argument('--baseline', type=str, default='threshold',
-                        help='Baseline type')
     parser.add_argument('--out', type=str, default='outputs/experiments/results.json',
                         help='Output path for results')
     parser.add_argument('--steps', type=int, default=400,
