@@ -1,5 +1,66 @@
 # CHANGELOG — MultiAgent Flood Detection System
 
+## v2.8 — Camera-Ready Finalization Pass (2026-08-27)
+
+Text-only improvements applied to the camera-ready paper
+(`Final Submission Documents/4_cameraReady/96_Buljic/96_Buljic_paper.docx`),
+per the plan in `HANDOFF_TO_NEXT_AGENT.md` Section 2. No experiment code or
+measured numbers changed; the PDF was regenerated and the submission
+archives rebuilt.
+
+### Paper text (docx)
+
+1. **New citations (5)** — trust/alert-fatigue claim in Sec. 1 now cites
+   Matsuda, Kotani & Onishi (WCAS 17(4), 2025) and Watanabe et al.
+   (J. Meteorol. Soc. Japan 104, 2026); Sec. 2 positions Rafanelli,
+   Costantini & De Gasperis (Intelligenza Artificiale 17(1), 2023),
+   Avula et al. (IEEE eScience 2025, "Flood Watch"), and Tamascelli,
+   Paltrinieri & Cozzani (Comput. Chem. Eng. 143, 2020) as references
+   [29]-[33]. Note: the chattering-alarm paper previously identified as
+   "Zhou et al. (2020)" is authored by Tamascelli, Paltrinieri & Cozzani
+   (verified via Crossref).
+2. **Zone layout disclosure (Sec. 4.1)** — the 20x20 grid / four 10x10
+   zones / central river corridor / upstream-inflow asymmetry is now
+   described; the 3x3 (river vs land zones) scalability study is framed
+   as future work (Sec. 6, item 6).
+3. **Unverifiable claims softened (Sec. 4.3)** — the TH_UP = 0.6
+   "majority-class flood probability" justification is reworded to
+   "selected by inspecting the calibrated model's score distribution",
+   and the deadband observation is marked as an informal design
+   observation.
+4. **AUC circularity note (Sec. 5.1)** — part of the near-perfect
+   ROC-AUC reflects the causal water-level/label link; operational value
+   lies in the pre-threshold (lead-time) regime.
+5. **Lead-time definition (Sec. 4.4)** — states precisely how lead time
+   is measured (per zone, last warning-state transition before onset;
+   floods without a preceding warning contribute none). Metric code
+   unchanged.
+6. **Reproducibility statement** — added before Acknowledgments
+   (ADDITIONS_DRAFT section A, with `[REPOSITORY-URL]` placeholder for
+   the authors).
+7. **Research questions RQ1-RQ3** — added at the end of Sec. 1
+   (ADDITIONS_DRAFT section B; section mapping matches the existing
+   paper structure). The positioning table (section C) was NOT added to
+   avoid renumbering Tables 1-3.
+8. **Abstract wording** — "detects even 2.6x better" -> "achieves 2.6x
+   higher detection F1" (overstated "detects" removed).
+9. **Reference list normalized** — "Accessed" dates unified to
+   "Accessed DD Mon YYYY", internal spaces in URLs removed (refs 2, 18,
+   24), page-range dashes normalized (refs 4, 7: en dashes).
+
+### Packaging & verification
+
+- PDF regenerated from the edited docx (LibreOffice headless); verified
+  against the handoff checklist: "4 zones" >= 3x, "9 zones" 0x, new
+  citations [29]-[33] present in text and reference list, "zero false
+  alarms" absent, normal_wet 2.6%/7.9% FPR wording present, "55 early
+  warnings ... 18.3 per scenario" present, tables/figures unchanged.
+- `96_Buljic.zip` rebuilt from `96_Buljic/` (docx + pdf);
+  `Figures.zip` rebuilt as Fig.1.jpg + Fig.2_regenerated.png +
+  Fig.3_regenerated.png per the handoff packaging rules.
+- `python -m pytest tests/ -q`: 74 passed (requires the pinned
+  `mesa==2.1.4`; mesa 3.x breaks the `Agent(unique_id, model)` API).
+
 ## v2.7 — Camera-Ready Consistency Fixes (2026-08-27)
 
 Aligns code and paper claims with the archived experiment artifacts.

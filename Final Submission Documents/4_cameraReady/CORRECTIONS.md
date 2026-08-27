@@ -3,6 +3,45 @@
 Date: 2026-08-27
 Files: `96_Buljic_paper.docx` (authoritative), `96_Buljic_paper.pdf` (converted copy)
 
+## Second pass (2026-08-27, text only — no numbers changed)
+
+Applied the improvements listed in `HANDOFF_TO_NEXT_AGENT.md` Section 2:
+
+- **5 new citations [29]-[33]**: Matsuda/Kotani/Onishi (WCAS 17(4), 2025)
+  and Watanabe et al. (JMSJ 104, 2026) for the intro trust/alert-fatigue
+  claim; Rafanelli et al. (IA 17(1), 2023) and Avula et al. (IEEE eScience
+  2025) positioned in Sec. 2; Tamascelli et al. (Comput. Chem. Eng. 143,
+  2020) for the chattering-alarm motivation. (The "Zhou et al. 2020" paper
+  is actually authored by Tamascelli, Paltrinieri & Cozzani — verified via
+  Crossref.)
+- **Zone layout disclosure (Sec. 4.1)**: 20x20 grid, four 10x10 zones,
+  central river corridor, upstream-inflow asymmetry; 3x3 river-vs-land
+  study added as future work (Sec. 6, item 6).
+- **Sec. 4.3**: TH_UP justification reworded (score-distribution
+  inspection), deadband observation marked informal.
+- **Sec. 5.1**: AUC circularity caveat added.
+- **Sec. 4.4**: precise lead-time definition added (metric code unchanged).
+- **Sec. 1**: RQ1-RQ3 paragraph added (ADDITIONS_DRAFT B).
+- **Sec. 6**: reproducibility statement added before Acknowledgments
+  (ADDITIONS_DRAFT A) with `[REPOSITORY-URL]` placeholder — **authors must
+  fill in the repo/Zenodo URL**.
+- **References**: normalized (Accessed dates unified, URL internal spaces
+  removed, en dashes in page ranges).
+- Abstract "detects even 2.6x better" -> "achieves 2.6x higher detection F1".
+
+The positioning table (ADDITIONS_DRAFT C) was intentionally NOT added to
+avoid renumbering Tables 1-3. Page count went 17 -> 18; if the venue hard-
+limits at 17, the cheapest trims are the RQ paragraph or the reproducibility
+statement.
+
+Verification: PDF text re-checked (4 zones x3, no "9 zones", new citations
+present, "zero false alarms" absent, 2.6%/7.9% and 55/18.3 wording intact);
+`96_Buljic.zip` and `Figures.zip` rebuilt.
+
+---
+
+## First pass corrections
+
 All corrections below were made to the paper text so that it matches the
 archived experiment artifacts (`outputs/experiments/results.json`, the training
 report `outputs/models/train_report.json`, the training dataset
