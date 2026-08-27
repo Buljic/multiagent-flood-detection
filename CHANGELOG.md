@@ -1,5 +1,44 @@
 # CHANGELOG — MultiAgent Flood Detection System
 
+## v2.12 - Noise-Consistency Re-Run & Camera-Ready Re-Sync (2026-08-27)
+
+A noise-consistency fix in `ml/generate_data.py` (training-time health and
+consensus features aligned with the runtime edge agents) required a retrain,
+so the full deterministic pipeline was re-run (2,000 episodes x 400 steps,
+seed 42; 8 scenarios x 3 repeats, seeds 42/1042/2042; hero sims). The fresh
+canonical artifacts are in `FINAL_RESULTS/` (results.json 2026-08-27T18:38,
+final_report.json, hero parquets, final_model.pkl). Every paper number was
+re-derived from these artifacts and the docx/PDF/figures re-synced
+(CORRECTIONS.md sixth pass):
+
+1. **Model metrics (Table 2)**: ROC-AUC 0.999 -> 0.998, F1 0.992 -> 0.990,
+   Recall 0.990 -> 0.985, Brier 0.007 -> 0.009, CV 0.998 +/- 0.000,
+   Accuracy 0.989; confusion matrix TN 265,460 / FP 1,654 / FN 5,018 /
+   TP 319,868; FPR 0.62%, miss rate 1.54%.
+2. **Feature importance (Table 3)**: water_max_10 0.442, water_mean_5
+   0.326, water_slope_5 0.094 (3rd), consensus 0.087 (4th), soil_mean_10
+   0.028, rain_mean_10 0.012, rain_sum_20 0.011, health 0.000.
+3. **Scenario results (Table 4)**: all eight rows + average row updated
+   from the fresh results.json (average row 0.376 / 0.140 / 0.972 / 0.362 /
+   2.8). Baseline columns unchanged (F1 0.175-0.196, precision 1.000,
+   recall ~10.4%, 8.0 state changes).
+4. **Headlines**: F1 advantage 2.6x -> 2.7x (0.38 vs 0.14), recall
+   advantage 3.4x -> 3.5x (36.2% vs 10.4%), precision ~97%, mean lead time
+   2.8 steps (~40 min, was 4.0/~60), early warnings 53 (8.8 per scenario),
+   normal_wet FPR 2.6% / 7.8% worst, dropout_50 state changes 12.0 vs 14.0.
+5. **Dropout lead-time narrative rewritten**: degraded-mode guardrails fire
+   far fewer early warnings under 50% dropout (2 vs 12 across repeats) and
+   mean lead time of those warnings falls 3.3 -> 1.7 steps.
+6. **Honest-disclosure additions**: repeat-variability sentence (per-scenario
+   F1 stds 0.19-0.23; MAS advantage holds in all 18/18 runs); per-zone-step
+   metric-construct sentence at the Sec 5.2 opening; repository URL
+   github.com/Buljic/multiagent-flood-detection in the reproducibility
+   statement.
+7. **Figures**: Fig. 2 / Fig. 3 re-embedded from the fresh artifacts
+   (`generate_paper_figures.py` annotation now data-driven, 2.7x); Fig. 3
+   narrative verified unchanged (45 min before / 240 min after). PDF
+   regenerated (19 pages), zips rebuilt.
+
 ## v2.11 — Final Quality Audit: Citation Renumbering & Typography (2026-08-27)
 
 Deep line-by-line verification of the paper against configs/code/artifacts

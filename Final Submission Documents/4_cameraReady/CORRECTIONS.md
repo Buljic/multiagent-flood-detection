@@ -3,7 +3,70 @@
 Date: 2026-08-27
 Files: `96_Buljic_paper.docx` (authoritative), `96_Buljic_paper.pdf` (converted copy)
 
-## Fifth pass (2026-08-27) — final quality audit (deep line-by-line verification)
+## Sixth pass (2026-08-27) - noise-consistency re-run, full number re-sync
+
+A noise-consistency fix in `ml/generate_data.py` (training-time health and
+consensus features aligned with the runtime edge-agent logic) required a
+retrain, so the full deterministic pipeline was re-run (2,000 episodes x
+400 steps, seed 42; training seed 42; 8 scenarios x 3 repeats, seeds
+42/1042/2042; hero sims). The fresh canonical artifacts are
+`FINAL_RESULTS/experiments/results.json` (timestamp 2026-08-27T18:38),
+`FINAL_RESULTS/model/final_report.json`, the hero parquets, and
+`final_model.pkl`. Every paper number was re-derived from these artifacts
+and the docx/PDF/figures were re-synced:
+
+- **Paper Table 2 (model metrics)**: ROC-AUC 0.999 -> 0.998; F1 0.992 ->
+  0.990; Precision 0.995 (unchanged); Recall 0.990 -> 0.985; Brier 0.007 ->
+  0.009; 5-fold CV 0.999 +/- 0.000 -> 0.998 +/- 0.000; Accuracy 0.992 ->
+  0.989. Confusion matrix TN 265,524 / FP 1,590 / FN 3,387 / TP 321,499 ->
+  TN 265,460 / FP 1,654 / FN 5,018 / TP 319,868; FPR 0.60% -> 0.62%; miss
+  rate 1.04% -> 1.54%. Test-set size 592,000 zone-steps unchanged.
+- **Paper Table 3 (feature importance)**: water_max_10 0.462 -> 0.442;
+  water_mean_5 0.333 -> 0.326; water_slope_5 0.046 -> 0.094 (now third);
+  consensus 0.096 -> 0.087 (now fourth); soil_mean_10 0.041 -> 0.028;
+  rain_mean_10 0.011 -> 0.012; rain_sum_20 0.012 -> 0.011; health 0.000
+  (unchanged). Text: consensus "third (9.6%)" -> "fourth (8.7%)"; "79.5%
+  combined" -> "76.8% combined".
+- **Paper Table 4 (scenario results)**: extreme_dry 0.450/0.919/0.323/5.2
+  -> 0.461/0.929/0.332/4.8; extreme_wet 0.497/0.965/0.358/3.4 ->
+  0.513/0.967/0.370/3.3; dropout_10 0.488/0.350/2.7 -> 0.502/0.362/2.8;
+  dropout_30 0.502/0.959/0.366/4.7 -> 0.511/0.981/0.369/2.5; dropout_50
+  0.987/0.374/7.0 -> 0.995/0.371/1.7; noisy 0.492/0.976/0.355/1.4 ->
+  0.509/0.992/0.366/1.4. Baseline columns unchanged (F1 0.175-0.196,
+  precision 1.000, recall 0.096-0.109). Average row 0.368/0.141/0.963/
+  0.354/4.0 -> 0.376/0.140/0.972/0.362/2.8.
+- **Headline claims**: F1 advantage 2.6x -> 2.7x (0.38 vs 0.14); recall
+  advantage 3.4x -> 3.5x (36.2% vs 10.4%); precision ~96% -> ~97%; mean
+  lead time 4.0 steps (~60 min) -> 2.8 steps (~40 min); early warnings 56
+  -> 53 (8.8 per scenario across its three repeats); normal_wet FPR 2.7% /
+  8.0% worst -> 2.6% / 7.8% worst; dropout_50 total state changes 13.3 ->
+  12.0 (vs 14.0 for extreme_wet); extreme_wet F1 in the dropout paragraph
+  0.497 -> 0.513; lead-time range 1.4-7.0 -> 1.4-4.8 steps (extreme_dry).
+- **Dropout lead-time narrative rewritten** (Sec 5.3): in the fresh run the
+  degraded-mode guardrails fire far fewer early warnings under 50% dropout
+  (2 across the three repeats vs 12 in extreme_wet) and the mean lead time
+  of those warnings falls from 3.3 to 1.7 steps; the old "increases from
+  3.4 to 7.0" claim no longer matches the data.
+- **Fig. 2 / Fig. 3 re-embedded** from the fresh artifacts. Fig. 3
+  narrative verified unchanged (FloodMAS 45 min before onset, baseline
+  240 min after, extreme_dropout_50 zone 1). `generate_paper_figures.py`
+  now computes the 2.7x annotation from the results summary instead of a
+  hardcoded value.
+- **Three honest-disclosure additions**: repeat-variability sentence after
+  the F1-average sentence in the Fig. 2 paragraph (per-scenario F1
+  standard deviations 0.19-0.23 across the three repeats; MAS advantage
+  holds in every scenario and every repeat); per-zone-step metric-construct
+  sentence at the opening of Sec 5.2; repository URL
+  github.com/Buljic/multiagent-flood-detection filled into the
+  reproducibility statement.
+
+Verification: MAS F1 exceeds baseline F1 in all 6 flood scenarios and all
+3 repeats (18/18 runs); per-scenario MAS F1 standard deviations range
+0.189-0.226; PDF regenerated (19 pages); zips rebuilt.
+
+---
+
+## Fifth pass (2026-08-27) - final quality audit (deep line-by-line verification)
 
 Deep audit of every claim in the paper against `configs/`, `sim/`, `ml/`,
 `eval/`, `baseline/` and the fresh artifacts. All implementation claims

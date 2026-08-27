@@ -25,6 +25,8 @@ def _load_scenario_f1():
 
     Source of truth is outputs/experiments/results.json (also copied to
     FINAL_RESULTS/experiments/results.json). Never hand-copy these values.
+    Returns the per-scenario F1 lists and the overall MAS/BL average F1
+    ratio from the results summary (used for the figure annotation).
     """
     results_path = Path("outputs/experiments/results.json")
     if not results_path.exists():
@@ -36,7 +38,10 @@ def _load_scenario_f1():
              "extreme_dropout_30", "extreme_dropout_50", "extreme_noisy"]
     mas_f1 = [scens[s]["aggregated"]["mas"]["detection"]["f1"]["mean"] for s in order]
     bl_f1 = [scens[s]["aggregated"]["baseline"]["detection"]["f1"]["mean"] for s in order]
-    return mas_f1, bl_f1
+    summary = results.get("summary", {})
+    bl_avg = summary.get("baseline_avg_f1", 0)
+    ratio = summary.get("mas_avg_f1", 0) / bl_avg if bl_avg else 0.0
+    return mas_f1, bl_f1, ratio
 
 
 # ── Figure A: Scenario comparison bar chart ──────────────────────────────────
@@ -50,7 +55,7 @@ def make_figA():
         "Dropout\n50%",
         "Noisy",
     ]
-    mas_f1, bl_f1 = _load_scenario_f1()
+    mas_f1, bl_f1, ratio = _load_scenario_f1()
 
     x = np.arange(len(scenarios))
     w = 0.35
@@ -76,11 +81,11 @@ def make_figA():
                 ha="center", va="bottom", fontsize=10, fontweight="bold",
                 color="#B8680A")
 
-    # 2.6× annotation on first pair
+    # overall MAS-vs-baseline F1 advantage annotation on first pair
     ax.annotate("", xy=(x[0] - w/2, mas_f1[0] + 0.07),
                 xytext=(x[0] + w/2, bl_f1[0] + 0.07),
                 arrowprops=dict(arrowstyle="<->", color="black", lw=1.5))
-    ax.text(x[0], mas_f1[0] + 0.09, "2.6×", ha="center",
+    ax.text(x[0], mas_f1[0] + 0.09, f"{ratio:.1f}×", ha="center",
             fontsize=10, fontweight="bold", color="black")
 
     ax.set_xticks(x)
@@ -102,7 +107,7 @@ def make_figA():
 
     # Description
     desc = OUT_DIR / "FigA_scenario_comparison.txt"
-    desc.write_text("""\
+    desc.write_text(f"""\
 Figure A: FloodMAS vs. Baseline — Detection F1 by Scenario
 ===========================================================
 
@@ -115,18 +120,18 @@ in those scenarios (correctly — there is no flood to detect).
 How to read:
 - Taller bar = better detection quality (catches more flood periods accurately)
 - Each pair of bars = one scenario
-- The 2.6× annotation shows the average advantage of FloodMAS over the baseline
+- The {ratio:.1f}× annotation shows the average advantage of FloodMAS over the baseline
 
 Key findings:
 - FloodMAS consistently outperforms the baseline across every scenario
 - The gap holds even under 50% sensor dropout (Dropout 50%)
 - Both systems achieve the same baseline F1 (~0.19) because the baseline
   is rigid and cannot adapt to scenario conditions
-- FloodMAS F1 ranges 0.45–0.52 across all extreme scenarios
+- FloodMAS F1 ranges {min(mas_f1):.2f}–{max(mas_f1):.2f} across all extreme scenarios
 
 Why this matters:
 Higher F1 means the system correctly identifies more flooded time periods
-without raising false alarms. A 2.6× improvement in F1 translates directly
+without raising false alarms. A {ratio:.1f}× improvement in F1 translates directly
 to more lives and assets protected during a real flood event.
 """, encoding="utf-8")
 

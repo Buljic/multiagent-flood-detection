@@ -117,6 +117,9 @@ class DataGenerator:
         zone_sensor_carry = {
             z.zone_id: [0] * sensors_per_zone for z in env.zones
         }
+        # Runtime edge uses ONE OutlierClipper per zone (max_delta = outlier_clip)
+        zone_clipper_last = {z.zone_id: None for z in env.zones}
+        outlier_clip = config['sensors'].get('outlier_clip', 0.3)
 
         # Per-zone tracking of consensus/health per step
         zone_step_meta = {z.zone_id: [] for z in env.zones}
@@ -170,6 +173,42 @@ class DataGenerator:
 
             all_states.append(zone_states)
 
+        # Per-zone noisy feature means (mirror runtime edge: mean over ACTIVE
+        # sensors of clipped water and raw noisy rain/soil readings)
+        zone_step_water = {z.zone_id: [] for z in env.zones}
+        zone_step_rain = {z.zone_id: [] for z in env.zones}
+        zone_step_soil = {z.zone_id: [] for z in env.zones}
+
+        # Re-simulate sensor readings to feed the feature buffers exactly like
+        # the runtime edge (noise scales: water sigma, soil 0.5*sigma, rain 0.3*sigma;
+        # water clipped to [0, 2] and outlier-clipped with max delta 0.3).
+        for step in range(steps):
+            for zone in env.zones:
+                zs = all_states[step][zone.zone_id]
+                zone_id = zone.zone_id
+                active_waters, active_rains, active_soils = [], [], []
+                last_clipped = zone_clipper_last[zone_id]
+                for s_idx in range(sensors_per_zone):
+                    if rng.random() < dropout_rate:
+                        continue
+                    noisy_water = zs['water'] + rng.normal(0, noise_std)
+                    noisy_water = np.clip(noisy_water, 0, 2.0)
+                    clipped = noisy_water
+                    if last_clipped is not None:
+                        clipped = min(max(noisy_water, last_clipped - outlier_clip),
+                                      last_clipped + outlier_clip)
+                    last_clipped = clipped
+                    active_waters.append(clipped)
+                    active_rains.append(zs['rain'] + rng.normal(0, noise_std * 0.3))
+                    active_soils.append(zs['soil'] + rng.normal(0, noise_std * 0.5))
+                zone_clipper_last[zone_id] = last_clipped
+                zone_step_water[zone_id].append(
+                    float(np.mean(active_waters)) if active_waters else 0.0)
+                zone_step_rain[zone_id].append(
+                    float(np.mean(active_rains)) if active_rains else 0.0)
+                zone_step_soil[zone_id].append(
+                    float(np.mean(active_soils)) if active_soils else 0.0)
+
         # Compute future flood labels
         for zone in env.zones:
             for t in range(steps):
@@ -187,10 +226,9 @@ class DataGenerator:
             soil_buf = RingBuffer(50)
 
             for step in range(steps - self.horizon_T):
-                zs = all_states[step][zone.zone_id]
-                water_buf.append(zs['water'])
-                rain_buf.append(zs['rain'])
-                soil_buf.append(zs['soil'])
+                water_buf.append(zone_step_water[zone.zone_id][step])
+                rain_buf.append(zone_step_rain[zone.zone_id][step])
+                soil_buf.append(zone_step_soil[zone.zone_id][step])
 
                 if step < min_warmup:
                     continue
