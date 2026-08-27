@@ -1,0 +1,166 @@
+{
+  "train": {
+    "auc_roc": 0.9984748493464184,
+    "f1": 0.9915070079925866,
+    "precision": 0.9935002228495023,
+    "recall": 0.9895217749169973,
+    "accuracy": 0.9908258258258258,
+    "brier_score": 0.00764667197132441,
+    "confusion_matrix": [
+      [
+        90971,
+        700
+      ],
+      [
+        1133,
+        106996
+      ]
+    ],
+    "feature_importance": {
+      "water_mean_5": 0.3270870380605174,
+      "water_slope_5": 0.05736844988798336,
+      "water_max_10": 0.47502955173505523,
+      "rain_sum_20": 0.011738135346340581,
+      "rain_mean_10": 0.012212429152266672,
+      "soil_mean_10": 0.03246777174858242,
+      "consensus": 0.08368803013711426,
+      "health": 0.00040859393214013657
+    },
+    "model_type": "rf",
+    "calibrated": true
+  },
+  "scenarios": {
+    "normal_wet": {
+      "mas_f1": 0.0,
+      "mas_prec": 0.0,
+      "mas_rec": 0.0,
+      "bl_f1": 0.0,
+      "bl_prec": 0.0,
+      "bl_rec": 0.0,
+      "mas_lead_steps": 6.0,
+      "mas_lead_count": 1,
+      "mas_state_changes": 2,
+      "bl_state_changes": 0,
+      "cm_mas": [
+        [
+          3345,
+          5
+        ],
+        [
+          250,
+          0
+        ]
+      ],
+      "cm_bl": [
+        [
+          3350,
+          0
+        ],
+        [
+          250,
+          0
+        ]
+      ],
+      "secs": 452
+    },
+    "extreme_dry": {
+      "mas_f1": 0.238,
+      "mas_prec": 0.962,
+      "mas_rec": 0.136,
+      "bl_f1": 0.2,
+      "bl_prec": 1.0,
+      "bl_rec": 0.111,
+      "mas_lead_steps": 4.0,
+      "mas_lead_count": 4,
+      "mas_state_changes": 36,
+      "bl_state_changes": 18,
+      "cm_mas": [
+        [
+          564,
+          16
+        ],
+        [
+          2610,
+          410
+        ]
+      ],
+      "cm_bl": [
+        [
+          580,
+          0
+        ],
+        [
+          2685,
+          335
+        ]
+      ],
+      "secs": 479
+    },
+    "extreme_wet": {
+      "mas_f1": 0.292,
+      "mas_prec": 0.942,
+      "mas_rec": 0.173,
+      "bl_f1": 0.199,
+      "bl_prec": 1.0,
+      "bl_rec": 0.11,
+      "mas_lead_steps": 4.12,
+      "mas_lead_count": 8,
+      "mas_state_changes": 36,
+      "bl_state_changes": 18,
+      "cm_mas": [
+        [
+          476,
+          33
+        ],
+        [
+          2557,
+          534
+        ]
+      ],
+      "cm_bl": [
+        [
+          509,
+          0
+        ],
+        [
+          2750,
+          341
+        ]
+      ],
+      "secs": 383
+    },
+    "extreme_dropout_50": {
+      "mas_f1": 0.384,
+      "mas_prec": 0.958,
+      "mas_rec": 0.24,
+      "bl_f1": 0.197,
+      "bl_prec": 1.0,
+      "bl_rec": 0.109,
+      "mas_lead_steps": 8.0,
+      "mas_lead_count": 4,
+      "mas_state_changes": 36,
+      "bl_state_changes": 18,
+      "cm_mas": [
+        [
+          495,
+          32
+        ],
+        [
+          2335,
+          738
+        ]
+      ],
+      "cm_bl": [
+        [
+          527,
+          0
+        ],
+        [
+          2738,
+          335
+        ]
+      ],
+      "secs": 450
+    }
+  }
+}

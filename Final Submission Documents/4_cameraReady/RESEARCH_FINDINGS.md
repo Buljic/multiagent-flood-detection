@@ -1,6 +1,18 @@
 # Self-Critical Audit: Zone Geometry, Paper Fallacies, and Related Work
 
-Prepared: 2026-08-27 (while the 9-zone pilot runs in the background).
+Prepared: 2026-08-27.
+
+**UPDATE (pilot verdict):** a 9-zone pilot (300 episodes, full training,
+4 key scenarios x 1 repeat, seed 42) was completed. Training quality was
+identical (AUC 0.9985 / F1 0.9915 / Brier 0.0076), but scenario-level MAS
+F1 dropped (extreme_dry 0.238 vs 0.449; extreme_wet 0.292 vs 0.497;
+extreme_dropout_50 0.384 vs 0.515), MAS recall dropped (0.14-0.24 vs
+0.32-0.38), the MAS-vs-baseline ratio fell to ~1.2-1.9x (from ~2.6x), and
+normal_wet contained 250 flooded zone-steps (the "no flooding" premise
+breaks with land-only zones). **Decision: keep the published 4-zone
+numbers; all paper text already says 4 zones (true).** The 9-zone layout
+becomes a documented future-work item. Full evidence:
+`pilot9_summary.json` (same folder).
 
 ---
 
