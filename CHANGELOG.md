@@ -1,5 +1,27 @@
 # CHANGELOG — MultiAgent Flood Detection System
 
+## v2.10 — Self-Critical Audit & Positioning Table (2026-08-27)
+
+Fourth-pass audit of the camera-ready paper (docs: `4_cameraReady/CORRECTIONS.md`
+fourth pass). The 3rd-version baseline was confirmed broken ("9 zones" x3,
+"zero false alarms", "18 early warnings", "Chapter" x5); the 4th version is
+now fully consistent:
+
+1. **Citation fix (Sec. 3.5)**: `[21,22]` -> `[22,28]` (was citing
+   Friedman's gradient-boosting paper for sklearn calibration docs).
+2. **New Table 1** (Related Work positioning table, ADDITIONS_DRAFT C) with
+   follow-up novelty sentence; Tables 1-3 renumbered to 2-4 (captions +
+   all in-text references + reproducibility statement).
+3. **Typography**: "±" restored in the CV row; "2.6x/3.4x/20x20/3x3" ->
+   "2.6×/3.4×/20×20/3×3"; em dashes in agent bullets; spaces after "):";
+   en dash in Table 4 caption.
+4. **Accuracy**: AUC-circularity note now cites Sections 5.2 and 5.4.
+5. Positioning table rendered with autofit layout (word-boundary wraps);
+   PDF regenerated (19 pages); zips rebuilt.
+
+No code or measured numbers changed in this pass — text/typography/structure
+only.
+
 ## v2.9 — Full Compute Re-Run & Paper Re-Sync (2026-08-27)
 
 Complete deterministic pipeline re-run (`python run_pipeline.py`, ~59 min):

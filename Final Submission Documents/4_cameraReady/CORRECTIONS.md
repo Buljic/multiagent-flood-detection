@@ -3,6 +3,40 @@
 Date: 2026-08-27
 Files: `96_Buljic_paper.docx` (authoritative), `96_Buljic_paper.pdf` (converted copy)
 
+## Fourth pass (2026-08-27) — self-critical audit ("super-fixed" v4)
+
+Full self-critical audit of the 4th version against the 3rd-version flaws,
+all instruction docs (HANDOFF / ADDITIONS_DRAFT / RESEARCH_FINDINGS) and
+the fresh artifacts. Fixes applied:
+
+1. **Citation bug (Sec. 3.5)**: calibration-curves/Brier sentence cited
+   `[21,22]`, where [21] is Friedman's gradient boosting. Now `[22,28]`
+   (sklearn CalibratedClassifierCV + brier_score_loss docs).
+2. **Positioning table added (Sec. 2, new Table 1)**: the related-work
+   positioning table from ADDITIONS_DRAFT section C (7 rows: physics-based
+   [7], ML reviews [8], data-driven [9], WSN+MAS [4,10], human-agent
+   collectives [11], agentic AI [12], FloodMAS) plus the follow-up
+   novelty sentence. All existing tables renumbered 1->2, 2->3, 3->4
+   (captions and in-text references); reproducibility statement now says
+   "Tables 2-4".
+3. **Typography**: restored the missing "±" in Table 2 (was "0.999  0.000"
+   -> "0.999 ± 0.000"); normalized ASCII "x" to "×" (2.6x -> 2.6×,
+   3.4x -> 3.4×, 20x20 -> 20×20, 3x3/4x4 -> 3×3/4×4); em dashes for the
+   agent bullets; spaces after "):" in the guardrail mechanism list;
+   en dash in the Table 4 caption.
+4. **Accuracy**: AUC-circularity note now points to Sections 5.2 and 5.4
+   (where the lead-time results actually live).
+5. **Figures/PDF**: positioning table rendered with clean column layout
+   (autofit, word-boundary wraps); PDF regenerated (19 pages); zips
+   rebuilt. All 12 verification checks pass (numbers, tables, citations
+   [1]-[33], "4 zones" x3, no "9 zones"/"zero false alarms"/"Chapter").
+
+Verified against the 3rd version (the broken baseline): 3rd had "9 zones"
+x3, "zero false alarms", "18 early warning alerts", "Chapter" x5, no
+honest FPR/warning numbers — all fixed in the 4th version.
+
+---
+
 ## Third pass (2026-08-27) — full compute re-run, paper re-synced to fresh artifacts
 
 A complete deterministic pipeline re-run was executed on 2026-08-27
