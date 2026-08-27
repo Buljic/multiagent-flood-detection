@@ -1,5 +1,41 @@
 # CHANGELOG — MultiAgent Flood Detection System
 
+## v2.7 — Camera-Ready Consistency Fixes (2026-08-27)
+
+Aligns code and paper claims with the archived experiment artifacts.
+All evaluations ran with 4 zones (the config default), while the
+paper stated 9 zones; the figure title and data-generator logic are
+corrected accordingly.
+
+### High
+
+#### 39. Paper and figure stated 9 zones; experiments used 4
+
+**File:** `generate_paper_figures.py`
+
+`configs/default.yaml` sets `num_zones: 4`, and every archived artifact
+(`outputs/experiments/results.json`, hero parquet logs, the training
+dataset) contains 4 zones. The FigA title now reports the true setup.
+
+#### 40. Training health/consensus features diverged from runtime
+
+**File:** `ml/generate_data.py`
+
+Health is now computed as `max(0, (active - missing_penalty) / total)`
+with the same carry-forward penalty schedule as `MissingValueHandler`,
+and the per-sensor previous reading is cleared on dropout, matching
+`SensorAgent` trend logic. The shipped model and archived results are
+unchanged (health has near-zero feature importance).
+
+### Low
+
+#### 41. Figure description files written in platform encoding
+
+**File:** `generate_paper_figures.py`
+
+`write_text` now passes `encoding="utf-8"` so the FigA/FigB description
+files are portable across platforms.
+
 ## v2.6 — Mutation Safety, Split Guards & Figure Resilience (2026-02-28)
 
 Fixes sensor reading mutation by reference, episode split edge cases,

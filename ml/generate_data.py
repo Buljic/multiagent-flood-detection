@@ -114,6 +114,9 @@ class DataGenerator:
         zone_sensor_prev = {
             z.zone_id: [None] * sensors_per_zone for z in env.zones
         }
+        zone_sensor_carry = {
+            z.zone_id: [0] * sensors_per_zone for z in env.zones
+        }
 
         # Per-zone tracking of consensus/health per step
         zone_step_meta = {z.zone_id: [] for z in env.zones}
@@ -134,21 +137,30 @@ class DataGenerator:
                 # Simulate actual sensors to compute consensus & health
                 active_count = 0
                 rising_count = 0
+                missing_penalty = 0.0
                 for s_idx in range(sensors_per_zone):
+                    prev = zone_sensor_prev[zone.zone_id][s_idx]
                     # Simulate dropout
                     if rng.random() < dropout_rate:
+                        if prev is None:
+                            missing_penalty += 1.0
+                        else:
+                            carry = zone_sensor_carry[zone.zone_id][s_idx] + 1
+                            zone_sensor_carry[zone.zone_id][s_idx] = carry
+                            missing_penalty += (carry / 5.0) * 0.5 if carry <= 5 else 1.0
+                        zone_sensor_prev[zone.zone_id][s_idx] = None
                         continue
                     active_count += 1
+                    zone_sensor_carry[zone.zone_id][s_idx] = 0
                     # Simulate noisy reading
                     noisy_water = zs['water_mean'] + rng.normal(0, noise_std)
                     noisy_water = np.clip(noisy_water, 0, 2.0)
                     # Check trend
-                    prev = zone_sensor_prev[zone.zone_id][s_idx]
                     if prev is not None and noisy_water > prev:
                         rising_count += 1
                     zone_sensor_prev[zone.zone_id][s_idx] = noisy_water
 
-                health = active_count / sensors_per_zone if sensors_per_zone > 0 else 1.0
+                health = max(0.0, (active_count - missing_penalty) / sensors_per_zone) if sensors_per_zone > 0 else 1.0
                 consensus = rising_count / active_count if active_count > 0 else 0.0
 
                 zone_step_meta[zone.zone_id].append({
