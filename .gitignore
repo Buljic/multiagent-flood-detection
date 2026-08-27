@@ -89,21 +89,12 @@ outputs/_deprecated_v1/
 !outputs/figures/.gitkeep
 
 # ============================================================
-# FINAL_RESULTS (regenerated from pipeline)
+# FINAL_RESULTS — commit only the evidence files; ignore the
+# large regenerable binaries (model, training data)
 # ============================================================
-FINAL_RESULTS/
+FINAL_RESULTS/model/*.pkl
+FINAL_RESULTS/training/*.parquet
 
 # ============================================================
-# Internal documentation (not for public repo)
+# Internal documentation (archived under archive/, not public)
 # ============================================================
-projectDescription.md
-CONCEPTS.md
-EVERYTHING_EXPLAINED.md
-IEEE_SECTIONS.md
-IEEE_PAPER.md
-notes/
-
-# ============================================================
-# Misc files that shouldn't be in repo
-# ============================================================
-New Text Document.txt
