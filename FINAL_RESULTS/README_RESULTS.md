@@ -1,5 +1,14 @@
 # FloodMAS - Final Test Results
 
+> ⚠️ **STALE DOCUMENT (historical, Feb 2026):** the numbers below describe the
+> early 300-episode/300-step validation run. The AUTHORITATIVE artifacts for
+> the camera-ready paper are the current `results.json` (8 scenarios x 3
+> repeats, seeds 42/1042/2042), `model/final_report.json` (2,000 episodes x
+> 400 steps, 592,000-row held-out test set) and `simulations/*.parquet`
+> (hero runs) in this folder — see the paper (Tables 1-3) and
+> `Final Submission Documents/4_cameraReady/CORRECTIONS.md`. Treat any
+> number below that differs from those files as superseded.
+
 **Test Date:** February 5, 2026  
 **Test Configuration:** 300 episodes × 300 steps training, 3 hero scenarios validation  
 **Random Seed:** 42 (reproducible)

@@ -1,5 +1,41 @@
 # CHANGELOG — MultiAgent Flood Detection System
 
+## v2.9 — Full Compute Re-Run & Paper Re-Sync (2026-08-27)
+
+Complete deterministic pipeline re-run (`python run_pipeline.py`, ~59 min):
+tests (74/74) -> data gen (2,000 episodes x 400 steps, seed 42) -> training
+(seed 42) -> hero sims (3) -> experiments (8 scenarios x 3 repeats, seeds
+42/1042/2042) -> figures -> FINAL_RESULTS copy. Environment uses newer
+libraries than the original pins (numpy 2.5.2 / pandas 3.0.5 / sklearn
+1.9.0 vs 1.26.2 / 2.1.3 / 1.3.2), so results drifted in the 3rd decimal.
+
+### What was verified (all hold)
+
+- Training: AUC 0.999, F1 0.992, precision 0.995, Brier 0.007, CV 0.999;
+  test split 592,000 rows / 400 held-out episodes from 2,960,000-row
+  dataset (exact).
+- Headlines: MAS vs baseline F1 2.62x, recall 3.42x, mean lead 4.0 steps
+  (~60 min), 13.3 vs 14.0 state changes, baseline 8.0, 56 early warnings
+  (18.7/scenario), normal_wet 2.7% avg FPR (8.0% worst repeat, 0 in two).
+- Fig. 3 narrative identical: MAS 45 min before onset, baseline 240 min
+  after (extreme_dropout_50, zone 1).
+
+### Paper updated to fresh artifacts (all in CORRECTIONS.md, third pass)
+
+- Table 1: Recall 0.990; CM 265,524/1,590/3,387/321,499; FPR 0.60%;
+  miss 1.04%.
+- Table 2: FI 0.462/0.333/0.096/0.046/0.041/0.011/0.012/0.000; text
+  79.5% combined, consensus 9.6%.
+- Table 3: extreme_dry 0.450/0.919/5.2; extreme_wet 0.965/3.4; dropout_10
+  0.969/2.7; dropout_50 0.514/0.374; noisy 0.976; averages unchanged.
+- Sec 5.2: 56 warnings, 18.7/scenario; Sec 5.3: 2.7%/8.0% FPR, 3.4->7.0
+  steps lead under dropout, F1 0.514.
+- Fig. 2 (FigA) and Fig. 3 (FigB) regenerated from fresh results/logs and
+  re-embedded; `generate_paper_figures.py` now reads F1 lists from
+  `results.json` (AGENTS.md hazard #2 — no more hand-copied values).
+- Zips rebuilt: `96_Buljic.zip`, `Figures.zip`; PDF regenerated and
+  verified (18 pages).
+
 ## v2.8 — Camera-Ready Finalization Pass (2026-08-27)
 
 Text-only improvements applied to the camera-ready paper

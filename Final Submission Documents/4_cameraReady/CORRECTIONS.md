@@ -3,6 +3,50 @@
 Date: 2026-08-27
 Files: `96_Buljic_paper.docx` (authoritative), `96_Buljic_paper.pdf` (converted copy)
 
+## Third pass (2026-08-27) — full compute re-run, paper re-synced to fresh artifacts
+
+A complete deterministic pipeline re-run was executed on 2026-08-27
+(`python run_pipeline.py`: 2,000 episodes x 400 steps, seed 42; training
+seed 42; 8 scenarios x 3 repeats, seeds 42/1042/2042; hero sims; figures;
+copy to FINAL_RESULTS). Library stack differs from the original pins
+(numpy 2.5.2 / pandas 3.0.5 / sklearn 1.9.0 vs pinned 1.26.2 / 2.1.3 /
+1.3.2), so results drifted in the 3rd decimal. All paper numbers were
+re-derived from the FRESH artifacts and the paper was updated to match:
+
+- **Table 1**: Recall 0.989 -> 0.990; confusion matrix TN 265,552 /
+  FP 1,562 / FN 3,433 / TP 321,453 -> TN 265,524 / FP 1,590 / FN 3,387 /
+  TP 321,499; FPR 0.58% -> 0.60%; miss rate 1.06% -> 1.04%.
+- **Table 2**: water_max_10 0.454 -> 0.462; water_mean_5 0.329 -> 0.333;
+  consensus 0.108 -> 0.096; water_slope_5 0.045 -> 0.046; rain_mean_10
+  0.012 -> 0.011; rain_sum_20 0.011 -> 0.012. Text: "78.3% combined" ->
+  "79.5% combined"; "consensus ... (10.8%)" -> "(9.6%)".
+- **Table 3**: extreme_dry 0.449/0.920/5.0 -> 0.450/0.919/5.2;
+  extreme_wet 0.967/3.2 -> 0.965/3.4; dropout_10 0.967/2.8 -> 0.969/2.7;
+  dropout_50 0.515/0.375 -> 0.514/0.374; noisy 0.978 -> 0.976. Averages
+  unchanged (0.368 / 0.141 / 0.963 / 0.354 / 4.0).
+- **Sec. 5.2**: 55 early warnings -> 56; 18.3 per scenario -> 18.7.
+- **Sec. 5.3**: normal_wet FPR 2.6% -> 2.7% avg, 7.9% -> 8.0% worst repeat
+  (0 / 0 / 128 FP zone-steps; was 126); dropout lead-time story 3.2 -> 3.4
+  steps; extreme_dropout_50 F1 0.515 -> 0.514 (still > extreme_wet 0.497).
+- **Fig. 2 / Fig. 3 re-embedded**: regenerated from fresh results and hero
+  logs; Fig. 3 claims verified unchanged (MAS 45 min before onset, baseline
+  240 min after, extreme_dropout_50 zone 1).
+- `generate_paper_figures.py` now reads the F1 lists from
+  `outputs/experiments/results.json` (no hand-copied values; AGENTS.md
+  hazard #2).
+- Headline claims verified unchanged: 2.6x F1 advantage (fresh 2.62),
+  3.4x recall (3.42), mean lead time 4.0 steps (~60 min), 13.3 vs 14.0
+  state changes, baseline 8.0 changes, no flooding in normal scenarios.
+
+Unchanged in the re-run: hero Fig.3 narrative, stability metrics, zone
+layout, baseline behaviour (BL F1 ~0.19, precision 1.000, recall ~10%),
+test-set provenance (592,000 rows / 400 held-out episodes).
+
+`FINAL_RESULTS/experiments/results.json`, `FINAL_RESULTS/model/final_report.json`
+and `FINAL_RESULTS/simulations/*.parquet` now hold the fresh (canonical) run.
+
+---
+
 ## Second pass (2026-08-27, text only — no numbers changed)
 
 Applied the improvements listed in `HANDOFF_TO_NEXT_AGENT.md` Section 2:

@@ -8,6 +8,7 @@ FigB: Simplified 2-panel timeline — Alert State + Ground Truth, real data,
 
 import pandas as pd
 import numpy as np
+import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyArrowPatch
@@ -17,6 +18,25 @@ OUT_DIR = Path("outputs/figures")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 STEP_MINUTES = 15  # each simulation step = 15 minutes
+
+
+def _load_scenario_f1():
+    """Read MAS/BL mean F1 per flood scenario from the experiment results.
+
+    Source of truth is outputs/experiments/results.json (also copied to
+    FINAL_RESULTS/experiments/results.json). Never hand-copy these values.
+    """
+    results_path = Path("outputs/experiments/results.json")
+    if not results_path.exists():
+        results_path = Path("FINAL_RESULTS/experiments/results.json")
+    with open(results_path) as f:
+        results = json.load(f)
+    scens = {s["scenario_name"]: s for s in results["scenarios"]}
+    order = ["extreme_dry", "extreme_wet", "extreme_dropout_10",
+             "extreme_dropout_30", "extreme_dropout_50", "extreme_noisy"]
+    mas_f1 = [scens[s]["aggregated"]["mas"]["detection"]["f1"]["mean"] for s in order]
+    bl_f1 = [scens[s]["aggregated"]["baseline"]["detection"]["f1"]["mean"] for s in order]
+    return mas_f1, bl_f1
 
 
 # ── Figure A: Scenario comparison bar chart ──────────────────────────────────
@@ -30,8 +50,7 @@ def make_figA():
         "Dropout\n50%",
         "Noisy",
     ]
-    mas_f1  = [0.449, 0.497, 0.488, 0.502, 0.515, 0.492]
-    bl_f1   = [0.175, 0.189, 0.188, 0.188, 0.188, 0.196]
+    mas_f1, bl_f1 = _load_scenario_f1()
 
     x = np.arange(len(scenarios))
     w = 0.35
