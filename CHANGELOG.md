@@ -1,5 +1,30 @@
 # CHANGELOG — MultiAgent Flood Detection System
 
+## v2.11 — Final Quality Audit: Citation Renumbering & Typography (2026-08-27)
+
+Deep line-by-line verification of the paper against configs/code/artifacts
+(CORRECTIONS.md fifth pass). All implementation claims verified correct.
+Fixes:
+
+1. **References renumbered to first-citation order** (LNCS convention):
+   [29,30]->[4,5] (Matsuda, Watanabe), [31,32]->[15,16] (Rafanelli,
+   Avula), [33]->[19] (Tamascelli), sklearn docs moved to [27]/[32]/[33],
+   etc.; all in-text markers rewritten and reference paragraphs reordered.
+   Verified: first-appearance order strictly 1..33.
+2. **Sec 3.1**: "X time steps" -> "T time steps".
+3. **Wording**: intro "and that improves" -> "which improves";
+   "operational stability, turning noisy signals"; mitigation bullet
+   "respond to sustained alerts".
+4. **RQ mapping**: "Sections 5.3 and 5.4 address RQ2-RQ3".
+5. **Typography**: " - " -> " — " em dashes (9 body spots), "TH_UP -
+   TH_DOWN" -> "TH_UP − TH_DOWN", reference title dashes -> en dashes,
+   abstract dashes -> em dashes.
+6. Positioning-table headers shortened ("Prob. calib.", "Alarm guard.")
+   with autofit for clean word-boundary wraps.
+
+No code or measured numbers changed. PDF regenerated (19 pages),
+17/17 verification checks pass, zips rebuilt.
+
 ## v2.10 — Self-Critical Audit & Positioning Table (2026-08-27)
 
 Fourth-pass audit of the camera-ready paper (docs: `4_cameraReady/CORRECTIONS.md`

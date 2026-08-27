@@ -3,6 +3,44 @@
 Date: 2026-08-27
 Files: `96_Buljic_paper.docx` (authoritative), `96_Buljic_paper.pdf` (converted copy)
 
+## Fifth pass (2026-08-27) — final quality audit (deep line-by-line verification)
+
+Deep audit of every claim in the paper against `configs/`, `sim/`, `ml/`,
+`eval/`, `baseline/` and the fresh artifacts. All implementation claims
+verified correct (guardrail params TH_UP/K_UP/CONS_MIN/HEALTH_MIN + degraded
+mode, health/consensus formulas, baseline thresholds + hysteresis + debounce,
+river geometry 3-col band / 4 zones / upstream inflow on the top row, 8
+scenarios, T=10, 15-min steps, flood threshold 0.7). Fixes applied:
+
+1. **Reference list renumbered to first-citation order** (LNCS convention).
+   Previously refs [29]-[33] (Matsuda, Watanabe, Rafanelli, Avula,
+   Tamascelli) were appended at the end even though they are first cited in
+   Sections 1-2, ahead of the sklearn-docs refs [26]-[28] (Sec 5.1). All
+   in-text markers rewritten (e.g. [29,30]->[4,5], [31,32]->[15,16],
+   [33]->[19], [4,10]->[6,12], [20]->[25], [21]->[26], [22]->[27],
+   [17,18]->[22,23]); reference paragraphs reordered to match. Verified:
+   first-appearance order is strictly 1..33.
+2. **Sec 3.1**: variable "X time steps" -> "T time steps" (was inconsistent
+   with T used everywhere else).
+3. **Grammar/wording**: intro "device availability and that improves" ->
+   "device availability, which improves"; "operational stability where we
+   turn noisy signals" -> "operational stability, turning noisy signals";
+   mitigation-agent bullet "react to sustained alerts so that they somewhat
+   react to the sensors" -> "respond to sustained alerts".
+4. **RQ-to-section mapping** (Sec 1): lead-time analysis lives in Sec 5.4,
+   so the mapping now reads "Sections 5.3 and 5.4 address RQ2-RQ3".
+5. **Typography**: parenthetical hyphens " - " -> em dashes " — " (9 body
+   spots); "TH_UP - TH_DOWN" -> "TH_UP − TH_DOWN" (minus sign); reference
+   title dashes -> en dashes (4 spots); abstract dash pair -> em dashes.
+6. Positioned-table header cells shortened for clean word-boundary wraps
+   ("Prob. calib.", "Alarm guard.", etc.) with autofit layout.
+
+Verification: 17/17 final checks on the regenerated PDF (19 pages) —
+tables 1-4, all fresh numbers, citations in order, typography, headline
+claims (2.6x, 3.4x, 60-min lead, 45/240-min Fig. 3 narrative).
+
+---
+
 ## Fourth pass (2026-08-27) — self-critical audit ("super-fixed" v4)
 
 Full self-critical audit of the 4th version against the 3rd-version flaws,
