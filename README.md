@@ -222,7 +222,7 @@ MIT License
 ```bibtex
 @inproceedings{buljic2026multiagent,
   title     = {Using Multi-Agent Systems For Predicting and Preventing Natural Disasters},
-  author    = {Bulji{'c}, Imad and Goran, Nermin and Hod{ z}i{'c}, Mujo},
+  author    = {Bulji{'c}, Imad and Goran, Nermin and Hod{\v z}i{\'c}, Mujo},
   booktitle = {Proceedings of the International Symposium on Innovative and Interdisciplinary Applications of Advanced Technologies (IAT 2026)},
   publisher = {Springer},
   year      = {2026},
