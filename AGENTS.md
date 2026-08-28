@@ -2,16 +2,7 @@
 
 ## Branch policy (mandatory)
 
-- `main` — intentionally EMPTY (placeholder README only) until the project is finished and published.
-- `dev` — the main integration/sync branch. Only clean, finished work lands here.
-- `dev-imad` — the working branch. All commits happen here first; merge into `dev` only when a piece of work is verified and stable.
-
-### Handoff rule (important)
-
-`HANDOFF_TO_NEXT_AGENT.md` exists ONLY on `dev-imad`. It is internal working
-material ("dirty code"). Before any merge `dev-imad` → `dev`, the handoff
-file MUST be deleted (and the deletion committed). It must never exist on
-`dev` and never on `main`.
+- `main` — the single branch. The project is finished and published; all work lands on `main` directly.
 
 ## Commands
 
