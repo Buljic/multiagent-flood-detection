@@ -220,11 +220,13 @@ MIT License
 ## Citation
 
 ```bibtex
-@software{floodmas2024,
-  title = {FloodMAS: Multi-Agent Flood Early-Warning System},
-  year = {2024},
-  author = {Your Name},
-  url = {https://github.com/your-repo/floodmas}
+@inproceedings{buljic2026multiagent,
+  title     = {Using Multi-Agent Systems For Predicting and Preventing Natural Disasters},
+  author    = {Bulji{'c}, Imad and Goran, Nermin and Hod{ z}i{'c}, Mujo},
+  booktitle = {Proceedings of the International Symposium on Innovative and Interdisciplinary Applications of Advanced Technologies (IAT 2026)},
+  publisher = {Springer},
+  year      = {2026},
+  note      = {To appear}
 }
 ```
 
