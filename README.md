@@ -237,4 +237,9 @@ If you use this repository in your research, please cite:
 > Imad Buljić, Nermin Goran, and Mujo Hodžić. "Using Multi-Agent Systems For Predicting and Preventing Natural Disasters." In *Proceedings of the International Symposium on Innovative and Interdisciplinary Applications of Advanced Technologies (IAT) 2026*. Springer (to appear).
 
 - Repository: https://github.com/Buljic/multiagent-flood-detection
-- Author: https://imadbuljic.com
+- Authors:
+  - Imad Buljić - [ORCID 0009-0009-2723-2315](https://orcid.org/0009-0009-2723-2315) - [imadbuljic.com](https://imadbuljic.com)
+  - Nermin Goran - [ORCID 0000-0002-0905-0843](https://orcid.org/0000-0002-0905-0843)
+  - Mujo Hodžić - [ORCID 0000-0002-0015-8268](https://orcid.org/0000-0002-0015-8268)
+
+The paper will be linked here with its Springer DOI once published.
