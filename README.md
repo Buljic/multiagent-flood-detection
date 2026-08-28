@@ -227,3 +227,12 @@ MIT License
   url = {https://github.com/your-repo/floodmas}
 }
 ```
+
+## Citation
+
+If you use this repository in your research, please cite:
+
+> Imad Buljić, Nermin Goran, and Mujo Hodžić. "Using Multi-Agent Systems For Predicting and Preventing Natural Disasters." In *Proceedings of the International Symposium on Innovative and Interdisciplinary Applications of Advanced Technologies (IAT) 2026*. Springer (to appear).
+
+- Repository: https://github.com/Buljic/multiagent-flood-detection
+- Author: https://imadbuljic.com
